@@ -29,8 +29,10 @@ void MainWindow::makePlot()
     //* Convert VectorXd to std::vector to Qvector...
     std::vector<double> first_column_std_vector(first_column.data(), first_column.data() + first_column.rows() * first_column.cols());
     std::vector<double> second_column_std_vector(second_column.data(), second_column.data() + second_column.rows() * second_column.cols());
-    QVector<double> first_column_QVector = QVector<double>(first_column_std_vector.begin(),first_column_std_vector.end());
-    QVector<double> second_column_QVector = QVector<double>(second_column_std_vector.begin(),second_column_std_vector.end());
+    // QVector<double> first_column_QVector = QVector<double>(first_column_std_vector.begin(),first_column_std_vector.end());
+    // QVector<double> second_column_QVector = QVector<double>(second_column_std_vector.begin(),second_column_std_vector.end());
+    QVector<double> first_column_QVector = QVector<double>::fromStdVector(first_column_std_vector);
+    QVector<double> second_column_QVector = QVector<double>::fromStdVector(second_column_std_vector);
 
     //* Set axis
     double first_column_maxValues = first_column.maxCoeff();
