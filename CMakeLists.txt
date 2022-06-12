@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.6)
 
 project(Cytometrie_en_flux LANGUAGES CXX)
 
@@ -11,10 +11,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(QT5_LIBRARIES Qt5::Widgets Qt5::PrintSupport)
+set(QT6_LIBRARIES Qt6::Widgets Qt6::PrintSupport)
 
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5PrintSupport REQUIRED)
+find_package(Qt6Widgets REQUIRED)
+find_package(Qt6PrintSupport REQUIRED)
 
 set(PROJECT_SOURCES
         src/main.cpp
@@ -34,4 +34,4 @@ add_executable(Cytometrie_en_flux
 target_include_directories(Cytometrie_en_flux PRIVATE ./include)
 target_include_directories(Cytometrie_en_flux PRIVATE ./ui)
 
-target_link_libraries(Cytometrie_en_flux ${QT5_LIBRARIES})
+target_link_libraries(Cytometrie_en_flux ${QT6_LIBRARIES})

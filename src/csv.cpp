@@ -14,6 +14,7 @@ std::pair<int, int> get_size(std::string file_path)
     std::pair<int, int> p;
     std::fstream file;
     file.open(file_path, std::ios::in);
+    std::cout << "file open ? : " << file.is_open() << std::endl;
     std::string line, word, temp;
     int nombre_de_lignes = 0;
     int nombre_de_colonnes = 0;

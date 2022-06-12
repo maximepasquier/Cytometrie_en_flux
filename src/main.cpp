@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
 {
     //* File name
     std::string file_path = ".././testCSV.csv";
+    
     //* Get file size (for eigen matrix)
     int number_lines_file, number_columns_file;
     std::pair<int, int> pair_file_size;
