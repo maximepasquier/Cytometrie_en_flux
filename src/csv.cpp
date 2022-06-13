@@ -30,19 +30,35 @@ std::pair<int, int> get_size(std::string file_path)
     }
     p.first = nombre_de_lignes;
     p.second = nombre_de_colonnes;
+    file.close();
     return p;
 }
 
-void read(MatrixXd& m)
+void get_marqueurs(std::string *marqueurs, std::string file_path)
+{
+    std::fstream file;
+    file.open(file_path, std::ios::in);
+    std::string line, word;
+    getline(file, line);
+    std::stringstream s(line);
+    int iterator = 0;
+    while (getline(s, word, ';'))
+    {
+        marqueurs[iterator++] = word;
+    }
+    file.close();
+}
+
+void read(MatrixXd &m)
 {
     std::fstream file;
     file.open(".././testCSV.csv", std::ios::in);
     std::string line, word, temp;
 
-    //std::pair matrix_size = get_size();
-    // std::cout << matrix_size.first << " " << matrix_size.second << std::endl;
+    // std::pair matrix_size = get_size();
+    //  std::cout << matrix_size.first << " " << matrix_size.second << std::endl;
 
-    //m(matrix_size.first, matrix_size.second);
+    // m(matrix_size.first, matrix_size.second);
     int ligne = 0, colonne = 0;
     getline(file, line);
 
@@ -59,6 +75,7 @@ void read(MatrixXd& m)
         colonne = 0;
         ligne++;
     }
+    file.close();
     // std::cout << ligne << ", " << colonne << std::endl;
     // std::cout << m << std::endl;
 }

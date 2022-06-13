@@ -21,7 +21,14 @@ int main(int argc, char *argv[])
     pair_file_size = get_size(file_path);
     number_lines_file = pair_file_size.first;
     number_columns_file = pair_file_size.second;
-    std::cout << number_columns_file << " " << number_lines_file << std::endl;
+    std::cout << "File size : " << number_columns_file << " " << number_lines_file << std::endl;
+    //* Get tous les marqueurs
+    std::string marqueurs[number_columns_file];
+    get_marqueurs(marqueurs, file_path);
+    for(int i = 0; i < number_columns_file; i++)
+    {
+        std::cout << marqueurs[i] << std::endl;
+    }
     //* Init MatrixXd
     MatrixXd m(number_lines_file, number_columns_file);
     QApplication app(argc, argv);
@@ -30,7 +37,7 @@ int main(int argc, char *argv[])
     //* Column selection for plotting in 2D
     int first_column = 3;
     int second_column = 5;
-    MainWindow w(nullptr, m.col(first_column),m.col(second_column));
+    MainWindow w(nullptr, marqueurs, m);
     w.show();
     return app.exec();
 }

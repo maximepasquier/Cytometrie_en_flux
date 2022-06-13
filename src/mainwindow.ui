@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>597</height>
+    <width>1280</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QWidget" name="centralwidget">
    <property name="maximumSize">
     <size>
-     <width>800</width>
-     <height>558</height>
+     <width>1280</width>
+     <height>720</height>
     </size>
    </property>
    <property name="layoutDirection">
@@ -26,50 +26,24 @@
    <widget class="QCustomPlot" name="customPlot" native="true">
     <property name="geometry">
      <rect>
-      <x>9</x>
-      <y>9</y>
-      <width>782</width>
-      <height>471</height>
+      <x>400</x>
+      <y>10</y>
+      <width>850</width>
+      <height>650</height>
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QToolButton" name="toolButton">
     <property name="geometry">
      <rect>
-      <x>330</x>
-      <y>510</y>
-      <width>80</width>
-      <height>23</height>
+      <x>143</x>
+      <y>230</y>
+      <width>111</width>
+      <height>71</height>
      </rect>
     </property>
     <property name="text">
-     <string>PushButton</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_2">
-    <property name="geometry">
-     <rect>
-      <x>220</x>
-      <y>510</y>
-      <width>80</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>PushButton</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_3">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>510</y>
-      <width>80</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>PushButton</string>
+     <string>...</string>
     </property>
    </widget>
   </widget>
@@ -78,10 +52,16 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1280</width>
      <height>20</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menufen_tre">
+    <property name="title">
+     <string>fenêtre</string>
+    </property>
+   </widget>
+   <addaction name="menufen_tre"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
@@ -89,7 +69,7 @@
   <customwidget>
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
+   <header location="global">qcustomplot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

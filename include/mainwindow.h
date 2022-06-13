@@ -22,7 +22,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent, VectorXd first_column, VectorXd second_column);
+    MainWindow(QWidget *parent, std::string* marqueurs, MatrixXd m);
     ~MainWindow();
 
 private slots:
@@ -30,6 +30,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    VectorXd first_column, second_column;
+    std::string* marqueurs;
+    MatrixXd m_visualisation;
 };
 #endif // MAINWINDOW_H

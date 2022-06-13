@@ -1,13 +1,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent, VectorXd first_column, VectorXd second_column)
+MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd m_visualisation)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->first_column = first_column;
-    this->second_column = second_column;
-    // std::cout << this->first_column << " " << this->second_column << std::endl;
+    this->marqueurs = marqueurs;
+    this->m_visualisation = m_visualisation;
     MainWindow::makePlot();
 }
 
@@ -25,6 +24,12 @@ void MainWindow::makePlot()
         x[i] = i / 50.0 - 1; // x goes from -1 to 1
         y[i] = x[i] * x[i];  // let's plot a quadratic function
     }
+
+    //* Select columns
+    int first_column_number = 3;
+    int second_column_number = 5;
+    VectorXd first_column = m_visualisation.col(first_column_number);
+    VectorXd second_column = m_visualisation.col(second_column_number);
 
     //* Convert VectorXd to std::vector to Qvector...
     std::vector<double> first_column_std_vector(first_column.data(), first_column.data() + first_column.rows() * first_column.cols());
@@ -59,11 +64,15 @@ void MainWindow::makePlot()
     // create graph and assign data to it:
     ui->customPlot->addGraph();
     ui->customPlot->graph(0)->setData(first_column_QVector, second_column_QVector);
+    ui->customPlot->setInteraction(QCP::iRangeDrag, true);
+    ui->customPlot->setInteraction(QCP::iRangeZoom, true);
+
     // give the axes some labels:
     ui->customPlot->xAxis->setLabel("marqueur 1");
     ui->customPlot->yAxis->setLabel("marqueur 2");
     // set axes ranges, so we see all data:
     ui->customPlot->xAxis->setRange(first_column_minValues, first_column_maxValues);
     ui->customPlot->yAxis->setRange(second_column_minValues, second_column_maxValues);
+
     ui->customPlot->replot();
 }
