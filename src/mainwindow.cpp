@@ -8,6 +8,22 @@ MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd m_visua
     this->marqueurs = marqueurs;
     this->m_visualisation = m_visualisation;
     MainWindow::makePlot();
+    createActions();
+    createMenus();
+    createToolButtons();
+    createToolBars();
+    QMenu *menu = new QMenu(this);
+    menu->addAction("SS PEAK LIN:SS PEAK LIN");
+    menu->addAction("K+4-FITC:FL1 INT LOG");
+    menu->addAction("SS INT LOG:SS INT LOG");
+
+    for(int i = 0; i < 18 ; i++)
+    {
+        //menu->addAction(marqueurs[i]);
+    }
+
+    ui->button_marqueur1->setMenu(menu);
+    ui->button_marqueur2->setMenu(menu);
 }
 
 MainWindow::~MainWindow()
@@ -75,4 +91,58 @@ void MainWindow::makePlot()
     ui->customPlot->yAxis->setRange(second_column_minValues, second_column_maxValues);
 
     ui->customPlot->replot();
+}
+
+void MainWindow::createActions()
+{
+    alignLeftAction = new QAction("Align left", this);
+    alignCenterAction = new QAction("Align center", this);
+    alignRightAction = new QAction("Align right", this);
+
+    alignLeftAction->setIcon(QIcon(":/icons/alignLeft.png"));
+    alignCenterAction->setIcon(QIcon(":/icons/alignCenter.png"));
+    alignRightAction->setIcon(QIcon(":/icons/alignRight.png"));
+
+    QObject::connect(alignLeftAction, SIGNAL(triggered()),
+                     this, SLOT(alignLeft()));
+    QObject::connect(alignCenterAction, SIGNAL(triggered()),
+                     this, SLOT(alignCenter()));
+    QObject::connect(alignRightAction, SIGNAL(triggered()),
+                     this, SLOT(alignRight()));
+}
+
+void MainWindow::createMenus()
+{
+    alignMenu = new QMenu;
+    alignMenu->addAction(alignLeftAction);
+    alignMenu->addAction(alignCenterAction);
+    alignMenu->addAction(alignRightAction);
+}
+
+void MainWindow::createToolButtons()
+{
+    alignToolButton = new CustomToolButton;
+    alignToolButton->setMenu(alignMenu);
+    alignToolButton->setDefaultAction(alignLeftAction);
+}
+
+void MainWindow::createToolBars()
+{
+    editToolBar = new QToolBar(this);
+    editToolBar->addWidget(alignToolButton);
+}
+
+void MainWindow::alignLeft()
+{
+    qDebug() << "MainWindow::alignLeft()";
+}
+
+void MainWindow::alignCenter()
+{
+    qDebug() << "MainWindow::alignCenter()";
+}
+
+void MainWindow::alignRight()
+{
+    qDebug() << "MainWindow::alignRight()";
 }

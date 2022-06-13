@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "qcustomplot.h"
 #include <iostream>
+#include "customtoolbutton.h"
 
 #include <eigen3/Eigen/Dense>
 
@@ -22,15 +23,30 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent, std::string* marqueurs, MatrixXd m);
+    MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd m);
     ~MainWindow();
 
-private slots:
+public slots:
     void makePlot();
+    void alignLeft();
+    void alignCenter();
+    void alignRight();
 
 private:
     Ui::MainWindow *ui;
-    std::string* marqueurs;
+    std::string *marqueurs;
     MatrixXd m_visualisation;
+
+    void createActions();
+    void createMenus();
+    void createToolBars();
+    void createToolButtons();
+
+    QAction *alignLeftAction;
+    QAction *alignCenterAction;
+    QAction *alignRightAction;
+    QMenu *alignMenu;
+    QToolBar *editToolBar;
+    CustomToolButton *alignToolButton;
 };
 #endif // MAINWINDOW_H

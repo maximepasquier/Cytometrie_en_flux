@@ -25,6 +25,8 @@ set(PROJECT_SOURCES
         include/csv.h
         include/mainwindow.h
         src/mainwindow.ui
+        src/customtoolbutton.cpp
+        include/customtoolbutton.h
 )
 
 add_executable(Cytometrie_en_flux

@@ -33,17 +33,30 @@
      </rect>
     </property>
    </widget>
-   <widget class="QToolButton" name="toolButton">
+   <widget class="CustomToolButton" name="button_marqueur1" native="true">
     <property name="geometry">
      <rect>
-      <x>143</x>
-      <y>230</y>
-      <width>111</width>
-      <height>71</height>
+      <x>150</x>
+      <y>325</y>
+      <width>200</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text" stdset="0">
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="CustomToolButton" name="button_marqueur2" native="true">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>365</y>
+      <width>200</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="text">
-     <string>...</string>
+     <string>PushButton</string>
     </property>
    </widget>
   </widget>
@@ -71,6 +84,11 @@
    <extends>QWidget</extends>
    <header location="global">qcustomplot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CustomToolButton</class>
+   <extends>QWidget</extends>
+   <header>customtoolbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
