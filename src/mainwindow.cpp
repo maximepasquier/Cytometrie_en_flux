@@ -8,19 +8,26 @@ MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd m_visua
     this->marqueurs = marqueurs;
     this->m_visualisation = m_visualisation;
     MainWindow::makePlot();
-    createActions();
-    createMenus();
-    createToolButtons();
-    createToolBars();
+    // createActions();
+    // createMenus();
+    // createToolButtons();
+    // createToolBars();
     QMenu *menu = new QMenu(this);
-    menu->addAction("SS PEAK LIN:SS PEAK LIN");
-    menu->addAction("K+4-FITC:FL1 INT LOG");
-    menu->addAction("SS INT LOG:SS INT LOG");
-
-    for(int i = 0; i < 18 ; i++)
+    // menu->addAction("SS PEAK LIN:SS PEAK LIN");
+    // menu->addAction("K+4-FITC:FL1 INT LOG");
+    // auto *quit = new QAction("&Quit", this);
+    // connect(quit, &QAction::triggered, qApp, QApplication::quit);
+    // menu->addAction(quit);
+    for (int i = 0; i < 18; i++)
     {
-        //menu->addAction(marqueurs[i]);
+        actionTest = new QAction(marqueurs[i].c_str(), this);
+        QObject::connect(actionTest, SIGNAL(triggered()), this, SLOT(alignLeft()));
+        menu->addAction(actionTest);
     }
+
+    // actionTest = new QAction(marqueurs[16].c_str(), this);
+    // QObject::connect(actionTest, SIGNAL(triggered()), this, SLOT(alignLeft()));
+    // menu->addAction(actionTest);
 
     ui->button_marqueur1->setMenu(menu);
     ui->button_marqueur2->setMenu(menu);
@@ -145,4 +152,19 @@ void MainWindow::alignCenter()
 void MainWindow::alignRight()
 {
     qDebug() << "MainWindow::alignRight()";
+}
+
+void MainWindow::on_buttonname_clicked()
+{
+    qDebug() << "pushbutton triggered !";
+}
+
+void MainWindow::on_actiontest1_1_triggered()
+{
+    qDebug() << "test1.1 triggered !";
+}
+
+void MainWindow::on_button_marqueur2_clicked()
+{
+    qDebug() << "button_marqueur2 triggered !";
 }

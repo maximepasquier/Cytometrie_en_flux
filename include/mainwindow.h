@@ -32,6 +32,13 @@ public slots:
     void alignCenter();
     void alignRight();
 
+private slots:
+    void on_buttonname_clicked();
+
+    void on_actiontest1_1_triggered();
+
+    void on_button_marqueur2_clicked();
+
 private:
     Ui::MainWindow *ui;
     std::string *marqueurs;
@@ -41,6 +48,8 @@ private:
     void createMenus();
     void createToolBars();
     void createToolButtons();
+
+    QAction *actionTest;
 
     QAction *alignLeftAction;
     QAction *alignCenterAction;
