@@ -7,11 +7,11 @@ MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd m_visua
     ui->setupUi(this);
     this->marqueurs = marqueurs;
     this->m_visualisation = m_visualisation;
-    MainWindow::makePlot();
-    // createActions();
-    // createMenus();
-    // createToolButtons();
-    // createToolBars();
+    // MainWindow::makePlot();
+    //  createActions();
+    //  createMenus();
+    //  createToolButtons();
+    //  createToolBars();
 
     QMenu *menu = new QMenu(this);
     // menu->addAction("SS PEAK LIN:SS PEAK LIN");
@@ -33,12 +33,14 @@ MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd m_visua
     ui->button_marqueur1->setMenu(menu);
     ui->button_marqueur2->setMenu(menu);
 
-    // Test : add items to comboBoxTest
+    // Test : add items to comboBox Test
     for (int i = 0; i < 18; i++)
     {
-        ui->comboBoxTest->addItem(marqueurs[i].c_str(), i);
+        ui->comboBox1->addItem(marqueurs[i].c_str(), i);
+        ui->comboBox2->addItem(marqueurs[i].c_str(), i);
     }
-    QObject::connect(ui->comboBoxTest, SIGNAL(activated(int)), this, SLOT(updateUI()));
+    QObject::connect(ui->comboBox1, SIGNAL(activated(int)), this, SLOT(updateUI()));
+    QObject::connect(ui->comboBox2, SIGNAL(activated(int)), this, SLOT(updateUI()));
     updateUI();
 }
 
@@ -49,13 +51,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::updateUI()
 {
-    int marqueur_number = ui->comboBoxTest->itemData(ui->comboBoxTest->currentIndex()).toInt();
-    std::cout << "marqueur_number number is : " << marqueur_number << std::endl;
+    int marqueur_number_1 = ui->comboBox1->itemData(ui->comboBox1->currentIndex()).toInt();
+    int marqueur_number_2 = ui->comboBox2->itemData(ui->comboBox2->currentIndex()).toInt();
+    MainWindow::makePlot(marqueur_number_1, marqueur_number_2);
 }
 
-void MainWindow::makePlot()
+void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
 {
     std::cout << "makePlot !" << std::endl;
+    std::cout << "marqueur_number1 number is : " << marqueur_number_1 << ", marqueur_number2 number is : " << marqueur_number_2 << std::endl;
     // generate some data:
     QVector<double> x(101), y(101); // initialize with entries 0..100
     for (int i = 0; i < 101; ++i)
@@ -65,8 +69,8 @@ void MainWindow::makePlot()
     }
 
     //* Select columns
-    int first_column_number = 3;
-    int second_column_number = 5;
+    int first_column_number = marqueur_number_1;
+    int second_column_number = marqueur_number_2;
     VectorXd first_column = m_visualisation.col(first_column_number);
     VectorXd second_column = m_visualisation.col(second_column_number);
 
@@ -170,7 +174,6 @@ void MainWindow::alignRight()
     qDebug() << "MainWindow::alignRight()";
 }
 
-
 void MainWindow::on_buttonname_clicked()
 {
     qDebug() << "pushbutton triggered !";
@@ -185,4 +188,3 @@ void MainWindow::on_button_marqueur2_clicked()
 {
     qDebug() << "button_marqueur2 triggered !";
 }
-

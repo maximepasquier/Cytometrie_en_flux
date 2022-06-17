@@ -27,7 +27,7 @@ public:
     ~MainWindow();
 
 public slots:
-    void makePlot();
+    void makePlot(int marqueur_number_1, int marqueur_number_2);
     void alignLeft();
     void alignCenter();
     void alignRight();
