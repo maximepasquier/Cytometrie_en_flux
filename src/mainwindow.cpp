@@ -1,6 +1,31 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QtCharts/QChartView>
+#include <QtCharts/QPieSeries>
+#include <QtCharts/QPieSlice>
+#include <QtCharts/QAbstractBarSeries>
+#include <QtCharts/QPercentBarSeries>
+#include <QtCharts/QStackedBarSeries>
+#include <QtCharts/QBarSeries>
+#include <QtCharts/QBarSet>
+#include <QtCharts/QLineSeries>
+#include <QtCharts/QSplineSeries>
+#include <QtCharts/QScatterSeries>
+#include <QtCharts/QAreaSeries>
+#include <QtCharts/QLegend>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QLabel>
+//#include <QtCore/QRandomGenerator>
+#include <QtCharts/QBarCategoryAxis>
+#include <QtWidgets/QApplication>
+#include <QtCharts/QValueAxis>
+
 MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd m_visualisation)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -19,19 +44,37 @@ MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd m_visua
     // auto *quit = new QAction("&Quit", this);
     // connect(quit, &QAction::triggered, qApp, QApplication::quit);
     // menu->addAction(quit);
+    /*
     for (int i = 0; i < 18; i++)
     {
         actionTest = new QAction(marqueurs[i].c_str(), this);
         QObject::connect(actionTest, SIGNAL(triggered()), this, SLOT(alignLeft()));
         menu->addAction(actionTest);
     }
+    */
 
     // actionTest = new QAction(marqueurs[16].c_str(), this);
     // QObject::connect(actionTest, SIGNAL(triggered()), this, SLOT(alignLeft()));
     // menu->addAction(actionTest);
 
-    ui->button_marqueur1->setMenu(menu);
-    ui->button_marqueur2->setMenu(menu);
+    // ui->button_marqueur1->setMenu(menu);
+    // ui->button_marqueur2->setMenu(menu);
+
+    //+ Populate themecombobox
+    ui->themeComboBox->addItem("Light", QChart::ChartThemeLight);
+    ui->themeComboBox->addItem("Blue Cerulean", QChart::ChartThemeBlueCerulean);
+    ui->themeComboBox->addItem("Dark", QChart::ChartThemeDark);
+    ui->themeComboBox->addItem("Brown Sand", QChart::ChartThemeBrownSand);
+    ui->themeComboBox->addItem("Blue NCS", QChart::ChartThemeBlueNcs);
+    ui->themeComboBox->addItem("High Contrast", QChart::ChartThemeHighContrast);
+    ui->themeComboBox->addItem("Blue Icy", QChart::ChartThemeBlueIcy);
+    ui->themeComboBox->addItem("Qt", QChart::ChartThemeQt);
+
+    //+ Set the colors from the light theme as default ones
+    QPalette pal = qApp->palette();
+    pal.setColor(QPalette::Window, QRgb(0xf0f0f0));
+    pal.setColor(QPalette::WindowText, QRgb(0x404044));
+    qApp->setPalette(pal);
 
     // Test : add items to comboBox Test
     for (int i = 0; i < 18; i++)
@@ -54,6 +97,53 @@ void MainWindow::updateUI()
     int marqueur_number_1 = ui->comboBox1->itemData(ui->comboBox1->currentIndex()).toInt();
     int marqueur_number_2 = ui->comboBox2->itemData(ui->comboBox2->currentIndex()).toInt();
     MainWindow::makePlot(marqueur_number_1, marqueur_number_2);
+
+    // Set palette colors based on selected theme
+    QChart::ChartTheme theme = static_cast<QChart::ChartTheme>(
+        ui->themeComboBox->itemData(ui->themeComboBox->currentIndex()).toInt());
+
+    QPalette pal = window()->palette();
+    if (theme == QChart::ChartThemeLight)
+    {
+        pal.setColor(QPalette::Window, QRgb(0xf0f0f0));
+        pal.setColor(QPalette::WindowText, QRgb(0x404044));
+    }
+    else if (theme == QChart::ChartThemeDark)
+    {
+        pal.setColor(QPalette::Window, QRgb(0x121218));
+        pal.setColor(QPalette::WindowText, QRgb(0xd6d6d6));
+    }
+    else if (theme == QChart::ChartThemeBlueCerulean)
+    {
+        pal.setColor(QPalette::Window, QRgb(0x40434a));
+        pal.setColor(QPalette::WindowText, QRgb(0xd6d6d6));
+    }
+    else if (theme == QChart::ChartThemeBrownSand)
+    {
+        pal.setColor(QPalette::Window, QRgb(0x9e8965));
+        pal.setColor(QPalette::WindowText, QRgb(0x404044));
+    }
+    else if (theme == QChart::ChartThemeBlueNcs)
+    {
+        pal.setColor(QPalette::Window, QRgb(0x018bba));
+        pal.setColor(QPalette::WindowText, QRgb(0x404044));
+    }
+    else if (theme == QChart::ChartThemeHighContrast)
+    {
+        pal.setColor(QPalette::Window, QRgb(0xffab03));
+        pal.setColor(QPalette::WindowText, QRgb(0x181818));
+    }
+    else if (theme == QChart::ChartThemeBlueIcy)
+    {
+        pal.setColor(QPalette::Window, QRgb(0xcee7f0));
+        pal.setColor(QPalette::WindowText, QRgb(0x404044));
+    }
+    else
+    {
+        pal.setColor(QPalette::Window, QRgb(0xf0f0f0));
+        pal.setColor(QPalette::WindowText, QRgb(0x404044));
+    }
+    window()->setPalette(pal);
 }
 
 void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
@@ -119,7 +209,7 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
 
     ui->customPlot->replot();
 }
-
+/*
 void MainWindow::createActions()
 {
     alignLeftAction = new QAction("Align left", this);
@@ -188,3 +278,4 @@ void MainWindow::on_button_marqueur2_clicked()
 {
     qDebug() << "button_marqueur2 triggered !";
 }
+*/

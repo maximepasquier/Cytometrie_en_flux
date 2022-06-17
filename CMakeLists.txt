@@ -11,8 +11,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(QT5_LIBRARIES Qt5::Widgets Qt5::PrintSupport)
+set(QT5_LIBRARIES Qt5::Widgets Qt5::PrintSupport Qt5::Charts)
 
+find_package(Qt5Charts)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5PrintSupport REQUIRED)
 

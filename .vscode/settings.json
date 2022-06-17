@@ -57,6 +57,8 @@
     "cinttypes": "cpp",
     "typeinfo": "cpp",
     "variant": "cpp",
-    "bit": "cpp"
+    "bit": "cpp",
+    "qgridlayout": "cpp",
+    "qcombobox": "cpp"
   }
 }

@@ -5,6 +5,8 @@
 #include "qcustomplot.h"
 #include <iostream>
 #include "customtoolbutton.h"
+#include <QtCharts>
+#include <QtCharts/QChartGlobal>
 
 #include <eigen3/Eigen/Dense>
 
@@ -28,14 +30,14 @@ public:
 
 public slots:
     void makePlot(int marqueur_number_1, int marqueur_number_2);
-    void alignLeft();
-    void alignCenter();
-    void alignRight();
+    // void alignLeft();
+    // void alignCenter();
+    // void alignRight();
 
 private slots:
-    void on_buttonname_clicked();
-    void on_actiontest1_1_triggered();
-    void on_button_marqueur2_clicked();
+    // void on_buttonname_clicked();
+    // void on_actiontest1_1_triggered();
+    // void on_button_marqueur2_clicked();
     void updateUI();
 
 private:
@@ -43,18 +45,18 @@ private:
     std::string *marqueurs;
     MatrixXd m_visualisation;
 
-    void createActions();
-    void createMenus();
-    void createToolBars();
-    void createToolButtons();
+    // void createActions();
+    // void createMenus();
+    // void createToolBars();
+    // void createToolButtons();
 
-    QAction *actionTest;
+    // QAction *actionTest;
 
-    QAction *alignLeftAction;
-    QAction *alignCenterAction;
-    QAction *alignRightAction;
-    QMenu *alignMenu;
-    QToolBar *editToolBar;
-    CustomToolButton *alignToolButton;
+    // QAction *alignLeftAction;
+    // QAction *alignCenterAction;
+    // QAction *alignRightAction;
+    // QMenu *alignMenu;
+    // QToolBar *editToolBar;
+    // CustomToolButton *alignToolButton;
 };
 #endif // MAINWINDOW_H
