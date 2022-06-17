@@ -34,10 +34,9 @@ public slots:
 
 private slots:
     void on_buttonname_clicked();
-
     void on_actiontest1_1_triggered();
-
     void on_button_marqueur2_clicked();
+    void updateUI();
 
 private:
     Ui::MainWindow *ui;

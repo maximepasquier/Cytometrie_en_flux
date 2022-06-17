@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd m_visua
     // createMenus();
     // createToolButtons();
     // createToolBars();
+
     QMenu *menu = new QMenu(this);
     // menu->addAction("SS PEAK LIN:SS PEAK LIN");
     // menu->addAction("K+4-FITC:FL1 INT LOG");
@@ -31,6 +32,14 @@ MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd m_visua
 
     ui->button_marqueur1->setMenu(menu);
     ui->button_marqueur2->setMenu(menu);
+
+    // Test : add items to comboBoxTest
+    for (int i = 0; i < 18; i++)
+    {
+        ui->comboBoxTest->addItem(marqueurs[i].c_str(), i);
+    }
+    QObject::connect(ui->comboBoxTest, SIGNAL(activated(int)), this, SLOT(updateUI()));
+    updateUI();
 }
 
 MainWindow::~MainWindow()
@@ -38,8 +47,15 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::updateUI()
+{
+    int marqueur_number = ui->comboBoxTest->itemData(ui->comboBoxTest->currentIndex()).toInt();
+    std::cout << "marqueur_number number is : " << marqueur_number << std::endl;
+}
+
 void MainWindow::makePlot()
 {
+    std::cout << "makePlot !" << std::endl;
     // generate some data:
     QVector<double> x(101), y(101); // initialize with entries 0..100
     for (int i = 0; i < 101; ++i)
@@ -154,6 +170,7 @@ void MainWindow::alignRight()
     qDebug() << "MainWindow::alignRight()";
 }
 
+
 void MainWindow::on_buttonname_clicked()
 {
     qDebug() << "pushbutton triggered !";
@@ -168,3 +185,4 @@ void MainWindow::on_button_marqueur2_clicked()
 {
     qDebug() << "button_marqueur2 triggered !";
 }
+

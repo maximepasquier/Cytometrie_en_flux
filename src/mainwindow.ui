@@ -72,6 +72,16 @@
      <string>test</string>
     </property>
    </widget>
+   <widget class="QComboBox" name="comboBoxTest">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>520</y>
+      <width>79</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
