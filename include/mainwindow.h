@@ -40,6 +40,11 @@ private slots:
     // void on_button_marqueur2_clicked();
     void updateUI();
 
+    void on_pushButton_clicked();
+    void on_pushButton_2_clicked();
+
+    void on_actionOpen_triggered();
+
 private:
     Ui::MainWindow *ui;
     std::string *marqueurs;

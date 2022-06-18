@@ -35,8 +35,6 @@ int main(int argc, char *argv[])
     read(m);
     std::cout << m << std::endl;
     //* Column selection for plotting in 2D
-    int first_column = 3;
-    int second_column = 5;
     MainWindow w(nullptr, marqueurs, m);
     w.show();
     return app.exec();

@@ -30,22 +30,36 @@
     <enum>Qt::LeftToRight</enum>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="5" column="0" colspan="2">
-     <widget class="QComboBox" name="comboBox1"/>
-    </item>
     <item row="0" column="0" colspan="4">
      <widget class="QCustomPlot" name="customPlot" native="true"/>
     </item>
     <item row="5" column="2" colspan="2">
      <widget class="QComboBox" name="comboBox2"/>
     </item>
-    <item row="4" column="2">
-     <widget class="QComboBox" name="themeComboBox"/>
-    </item>
     <item row="4" column="0">
      <widget class="QLabel" name="label">
       <property name="text">
        <string>Theme</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QComboBox" name="themeComboBox"/>
+    </item>
+    <item row="4" column="2" colspan="2">
+     <widget class="QComboBox" name="comboBox1"/>
+    </item>
+    <item row="5" column="1">
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>PushButton</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="text">
+       <string>PushButton</string>
       </property>
      </widget>
     </item>
@@ -60,6 +74,13 @@
      <height>20</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actiontest2">
@@ -75,6 +96,11 @@
   <action name="actiontest1_2">
    <property name="text">
     <string>test1.2</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open CSV</string>
    </property>
   </action>
  </widget>

@@ -279,3 +279,20 @@ void MainWindow::on_button_marqueur2_clicked()
     qDebug() << "button_marqueur2 triggered !";
 }
 */
+
+void MainWindow::on_pushButton_clicked()
+{
+    qDebug() << "pushButton_clicked !";
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    qDebug() << "pushButton_2_clicked !";
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+    qDebug() << "actionOpen_triggered !";
+    
+}
+
