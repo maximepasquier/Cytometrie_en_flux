@@ -3,8 +3,8 @@
 
 #include <QWidget>
 #include "mainwindow.h"
-#include "csv.h"
 #include "qcustomplot.h"
+#include "File.hpp"
 #include <iostream>
 #include <iostream>
 #include <eigen3/Eigen/Dense>
@@ -18,11 +18,12 @@ class Application : public QWidget
 {
     Q_OBJECT
 private:
-    /* data */
+    std::string csv_file_path;
+
 public:
     Application(/* args */);
     ~Application();
-    MainWindow* main_window;
+    MainWindow *main_window;
 };
 
 #endif

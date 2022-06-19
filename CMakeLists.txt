@@ -22,14 +22,16 @@ set(PROJECT_SOURCES
     src/mainwindow.cpp
     src/qcustomplot.cpp
     include/qcustomplot.h
-    src/csv.cpp
-    include/csv.h
     include/mainwindow.h
     src/mainwindow.ui
     src/customtoolbutton.cpp
     include/customtoolbutton.h
     src/Application.cpp
     include/Application.hpp
+    src/DataStruct.cpp
+    include/DataStruct.hpp
+    src/File.cpp
+    include/File.hpp
 )
 
 add_executable(Cytometrie_en_flux

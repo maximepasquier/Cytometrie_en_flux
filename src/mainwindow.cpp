@@ -21,44 +21,17 @@
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLabel>
-//#include <QtCore/QRandomGenerator>
 #include <QtCharts/QBarCategoryAxis>
 #include <QtWidgets/QApplication>
 #include <QtCharts/QValueAxis>
 
-MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd m_visualisation)
+MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd *data_matrix)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     this->marqueurs = marqueurs;
-    this->m_visualisation = m_visualisation;
-    // MainWindow::makePlot();
-    //  createActions();
-    //  createMenus();
-    //  createToolButtons();
-    //  createToolBars();
-
-    QMenu *menu = new QMenu(this);
-    // menu->addAction("SS PEAK LIN:SS PEAK LIN");
-    // menu->addAction("K+4-FITC:FL1 INT LOG");
-    // auto *quit = new QAction("&Quit", this);
-    // connect(quit, &QAction::triggered, qApp, QApplication::quit);
-    // menu->addAction(quit);
-    /*
-    for (int i = 0; i < 18; i++)
-    {
-        actionTest = new QAction(marqueurs[i].c_str(), this);
-        QObject::connect(actionTest, SIGNAL(triggered()), this, SLOT(alignLeft()));
-        menu->addAction(actionTest);
-    }
-    */
-
-    // actionTest = new QAction(marqueurs[16].c_str(), this);
-    // QObject::connect(actionTest, SIGNAL(triggered()), this, SLOT(alignLeft()));
-    // menu->addAction(actionTest);
-
-    // ui->button_marqueur1->setMenu(menu);
-    // ui->button_marqueur2->setMenu(menu);
+    //! Matrice complète == matrice de visualisation
+    m_visualisation = data_matrix;
 
     //+ Populate themecombobox
     ui->themeComboBox->addItem("Light", QChart::ChartThemeLight);
@@ -150,19 +123,12 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
 {
     std::cout << "makePlot !" << std::endl;
     std::cout << "marqueur_number1 number is : " << marqueur_number_1 << ", marqueur_number2 number is : " << marqueur_number_2 << std::endl;
-    // generate some data:
-    QVector<double> x(101), y(101); // initialize with entries 0..100
-    for (int i = 0; i < 101; ++i)
-    {
-        x[i] = i / 50.0 - 1; // x goes from -1 to 1
-        y[i] = x[i] * x[i];  // let's plot a quadratic function
-    }
 
     //* Select columns
     int first_column_number = marqueur_number_1;
     int second_column_number = marqueur_number_2;
-    VectorXd first_column = m_visualisation.col(first_column_number);
-    VectorXd second_column = m_visualisation.col(second_column_number);
+    VectorXd first_column = m_visualisation->col(first_column_number);
+    VectorXd second_column = m_visualisation->col(second_column_number);
 
     //* Convert VectorXd to std::vector to Qvector...
     std::vector<double> first_column_std_vector(first_column.data(), first_column.data() + first_column.rows() * first_column.cols());
@@ -209,76 +175,6 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
 
     ui->customPlot->replot();
 }
-/*
-void MainWindow::createActions()
-{
-    alignLeftAction = new QAction("Align left", this);
-    alignCenterAction = new QAction("Align center", this);
-    alignRightAction = new QAction("Align right", this);
-
-    alignLeftAction->setIcon(QIcon(":/icons/alignLeft.png"));
-    alignCenterAction->setIcon(QIcon(":/icons/alignCenter.png"));
-    alignRightAction->setIcon(QIcon(":/icons/alignRight.png"));
-
-    QObject::connect(alignLeftAction, SIGNAL(triggered()),
-                     this, SLOT(alignLeft()));
-    QObject::connect(alignCenterAction, SIGNAL(triggered()),
-                     this, SLOT(alignCenter()));
-    QObject::connect(alignRightAction, SIGNAL(triggered()),
-                     this, SLOT(alignRight()));
-}
-
-void MainWindow::createMenus()
-{
-    alignMenu = new QMenu;
-    alignMenu->addAction(alignLeftAction);
-    alignMenu->addAction(alignCenterAction);
-    alignMenu->addAction(alignRightAction);
-}
-
-void MainWindow::createToolButtons()
-{
-    alignToolButton = new CustomToolButton;
-    alignToolButton->setMenu(alignMenu);
-    alignToolButton->setDefaultAction(alignLeftAction);
-}
-
-void MainWindow::createToolBars()
-{
-    editToolBar = new QToolBar(this);
-    editToolBar->addWidget(alignToolButton);
-}
-
-void MainWindow::alignLeft()
-{
-    qDebug() << "MainWindow::alignLeft()";
-}
-
-void MainWindow::alignCenter()
-{
-    qDebug() << "MainWindow::alignCenter()";
-}
-
-void MainWindow::alignRight()
-{
-    qDebug() << "MainWindow::alignRight()";
-}
-
-void MainWindow::on_buttonname_clicked()
-{
-    qDebug() << "pushbutton triggered !";
-}
-
-void MainWindow::on_actiontest1_1_triggered()
-{
-    qDebug() << "test1.1 triggered !";
-}
-
-void MainWindow::on_button_marqueur2_clicked()
-{
-    qDebug() << "button_marqueur2 triggered !";
-}
-*/
 
 void MainWindow::on_pushButton_clicked()
 {
@@ -293,6 +189,4 @@ void MainWindow::on_pushButton_2_clicked()
 void MainWindow::on_actionOpen_triggered()
 {
     qDebug() << "actionOpen_triggered !";
-    
 }
-
