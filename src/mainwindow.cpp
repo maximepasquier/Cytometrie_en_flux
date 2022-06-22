@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
 #include <QtCharts/QChartView>
@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd *data_m
     }
     QObject::connect(ui->comboBox1, SIGNAL(activated(int)), this, SLOT(updateUI()));
     QObject::connect(ui->comboBox2, SIGNAL(activated(int)), this, SLOT(updateUI()));
+    QObject::connect(ui->themeComboBox, SIGNAL(activated(int)), this, SLOT(updateUI()));
     updateUI();
 }
 
@@ -167,8 +168,8 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
     ui->customPlot->setInteraction(QCP::iRangeZoom, true);
 
     // give the axes some labels:
-    ui->customPlot->xAxis->setLabel("marqueur 1");
-    ui->customPlot->yAxis->setLabel("marqueur 2");
+    ui->customPlot->xAxis->setLabel(marqueurs[marqueur_number_1].c_str());
+    ui->customPlot->yAxis->setLabel(marqueurs[marqueur_number_2].c_str());
     // set axes ranges, so we see all data:
     ui->customPlot->xAxis->setRange(first_column_minValues, first_column_maxValues);
     ui->customPlot->yAxis->setRange(second_column_minValues, second_column_maxValues);

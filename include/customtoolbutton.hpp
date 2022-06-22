@@ -1,5 +1,5 @@
-#ifndef CUSTOMTOOLBUTTON_H
-#define CUSTOMTOOLBUTTON_H
+#ifndef CUSTOMTOOLBUTTON_HPP
+#define CUSTOMTOOLBUTTON_HPP
 
 #include <QToolButton>
 #include <QDebug>

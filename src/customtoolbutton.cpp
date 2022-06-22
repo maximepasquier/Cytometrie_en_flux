@@ -1,4 +1,4 @@
-#include "customtoolbutton.h"
+#include "customtoolbutton.hpp"
 
 CustomToolButton::CustomToolButton(QWidget *parent) : QToolButton(parent)
 {

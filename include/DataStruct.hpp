@@ -11,7 +11,7 @@ class DataStruct
 private:
     MatrixXd data_matrix;
 public:
-    DataStruct(/* args */);
+    DataStruct();
     ~DataStruct();
 };
 

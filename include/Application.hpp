@@ -2,15 +2,10 @@
 #define APPLICATION_HPP
 
 #include <QWidget>
-#include "mainwindow.h"
-#include "qcustomplot.h"
+#include <iostream>
+#include <iostream>
+#include "mainwindow.hpp"
 #include "File.hpp"
-#include <iostream>
-#include <iostream>
-#include <eigen3/Eigen/Dense>
-
-using Eigen::MatrixXd;
-using Eigen::VectorXd;
 
 #include <QApplication>
 
@@ -21,7 +16,7 @@ private:
     std::string csv_file_path;
 
 public:
-    Application(/* args */);
+    Application();
     ~Application();
     MainWindow *main_window;
 };

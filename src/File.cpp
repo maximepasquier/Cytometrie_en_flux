@@ -1,6 +1,6 @@
 #include "File.hpp"
 
-File::File(/* args */)
+File::File()
 {
     file_path = ".././testCSV.csv";
     read_file_size();
@@ -60,8 +60,6 @@ void File::read_matrix()
 {
     //* Init la matrice de données;
     data_matrix = new MatrixXd(number_of_lines, number_of_columns);
-
-    MatrixXd m(number_of_lines, number_of_columns);
 
     std::fstream file;
     file.open(file_path, std::ios::in);

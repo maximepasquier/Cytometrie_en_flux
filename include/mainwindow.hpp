@@ -1,10 +1,10 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MAINWINDOW_HPP
+#define MAINWINDOW_HPP
 
 #include <QMainWindow>
 #include "qcustomplot.h"
 #include <iostream>
-#include "customtoolbutton.h"
+#include "customtoolbutton.hpp"
 #include <QtCharts>
 #include <QtCharts/QChartGlobal>
 
@@ -44,4 +44,4 @@ private:
     std::string *marqueurs;
     MatrixXd *m_visualisation;
 };
-#endif // MAINWINDOW_H
+#endif // MAINWINDOW_HPP

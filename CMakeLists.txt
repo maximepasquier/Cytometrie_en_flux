@@ -20,18 +20,18 @@ find_package(Qt5PrintSupport REQUIRED)
 set(PROJECT_SOURCES
     src/main.cpp
     src/mainwindow.cpp
+    include/mainwindow.hpp
     src/qcustomplot.cpp
     include/qcustomplot.h
-    include/mainwindow.h
-    src/mainwindow.ui
     src/customtoolbutton.cpp
-    include/customtoolbutton.h
+    include/customtoolbutton.hpp
     src/Application.cpp
     include/Application.hpp
     src/DataStruct.cpp
     include/DataStruct.hpp
     src/File.cpp
     include/File.hpp
+    src/mainwindow.ui
 )
 
 add_executable(Cytometrie_en_flux

@@ -18,7 +18,7 @@ private:
     std::string* marqueurs;
     MatrixXd *data_matrix;
 public:
-    File(/* args */);
+    File();
     ~File();
     void read_file_size();
     void read_marqueurs();

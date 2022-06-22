@@ -1,6 +1,6 @@
 #include "Application.hpp"
 
-Application::Application(/* args */)
+Application::Application()
 {
     //*Create a file object
     File csv_file;
