@@ -23,8 +23,6 @@ set(PROJECT_SOURCES
     include/mainwindow.hpp
     src/qcustomplot.cpp
     include/qcustomplot.h
-    src/customtoolbutton.cpp
-    include/customtoolbutton.hpp
     src/Application.cpp
     include/Application.hpp
     src/DataStruct.cpp

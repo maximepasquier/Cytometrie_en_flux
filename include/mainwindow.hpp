@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include "qcustomplot.h"
 #include <iostream>
-#include "customtoolbutton.hpp"
 #include <QtCharts>
 #include <QtCharts/QChartGlobal>
 
