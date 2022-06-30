@@ -25,6 +25,11 @@
 #include <QtWidgets/QApplication>
 #include <QtCharts/QValueAxis>
 
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+}
+
 MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd *data_matrix)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -155,26 +160,30 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
     latVector << -75 << -50 << -50 << 0 << 50 << 100 << 75;
     lonVector << -75 << -50 << -25 << 0 << 25 << 50 << 75;
 
-    QCPGraph *curGraph = ui->customPlot->addGraph();
+    QCustomPlot *customPlot = new QCustomPlot;
+
+    ui->verticalLayout->insertWidget(0,customPlot);
+
+    QCPGraph *curGraph = customPlot->addGraph();
     curGraph->setPen(drawPen);
     curGraph->setLineStyle(QCPGraph::lsNone);
     curGraph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 2));
     curGraph->setData(latVector, lonVector);
 
     // create graph and assign data to it:
-    ui->customPlot->addGraph();
-    ui->customPlot->graph(0)->setData(first_column_QVector, second_column_QVector);
-    ui->customPlot->setInteraction(QCP::iRangeDrag, true);
-    ui->customPlot->setInteraction(QCP::iRangeZoom, true);
+    customPlot->addGraph();
+    customPlot->graph(0)->setData(first_column_QVector, second_column_QVector);
+    customPlot->setInteraction(QCP::iRangeDrag, true);
+    customPlot->setInteraction(QCP::iRangeZoom, true);
 
     // give the axes some labels:
-    ui->customPlot->xAxis->setLabel(marqueurs[marqueur_number_1].c_str());
-    ui->customPlot->yAxis->setLabel(marqueurs[marqueur_number_2].c_str());
+    customPlot->xAxis->setLabel(marqueurs[marqueur_number_1].c_str());
+    customPlot->yAxis->setLabel(marqueurs[marqueur_number_2].c_str());
     // set axes ranges, so we see all data:
-    ui->customPlot->xAxis->setRange(first_column_minValues, first_column_maxValues);
-    ui->customPlot->yAxis->setRange(second_column_minValues, second_column_maxValues);
+    customPlot->xAxis->setRange(first_column_minValues, first_column_maxValues);
+    customPlot->yAxis->setRange(second_column_minValues, second_column_maxValues);
 
-    ui->customPlot->replot();
+    customPlot->replot();
 }
 
 void MainWindow::on_pushButton_clicked()

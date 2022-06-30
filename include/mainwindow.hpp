@@ -24,6 +24,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    MainWindow(QWidget *parent);
     MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd *data_matrix);
     ~MainWindow();
 
