@@ -1,8 +1,9 @@
 #include "File.hpp"
 
-File::File()
+File::File(std::string file_path)
 {
-    file_path = ".././testCSV.csv";
+    //file_path = ".././testCSV.csv";
+    this->file_path = file_path;
     read_file_size();
     read_marqueurs();
     read_matrix();

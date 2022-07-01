@@ -53,7 +53,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QComboBox" name="comboBox1"/>
+         <widget class="QComboBox" name="comboBoxMarqueur1"/>
         </item>
         <item row="1" column="0">
          <widget class="QLabel" name="label_3">
@@ -66,7 +66,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QComboBox" name="comboBox2"/>
+         <widget class="QComboBox" name="comboBoxMarqueur2"/>
         </item>
        </layout>
       </item>

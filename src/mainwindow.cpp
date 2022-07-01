@@ -28,6 +28,17 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->marqueurs = marqueurs;
+    //! Matrice complète == matrice de visualisation
+    // m_visualisation = data_matrix;
+    theme();
+    // populate_marqueurs();
+    connect_signals_to_slots();
+
+    spacer = new QSpacerItem(0, 20, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding);
+    ui->verticalLayout->insertSpacerItem(0, spacer);
+
+    // File csv_file;
 }
 
 MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd *data_matrix)
@@ -37,46 +48,40 @@ MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd *data_m
     this->marqueurs = marqueurs;
     //! Matrice complète == matrice de visualisation
     m_visualisation = data_matrix;
+    theme();
+    populate_marqueurs();
+    connect_signals_to_slots();
 
-    //+ Populate themecombobox
-    ui->themeComboBox->addItem("Light", QChart::ChartThemeLight);
-    ui->themeComboBox->addItem("Blue Cerulean", QChart::ChartThemeBlueCerulean);
-    ui->themeComboBox->addItem("Dark", QChart::ChartThemeDark);
-    ui->themeComboBox->addItem("Brown Sand", QChart::ChartThemeBrownSand);
-    ui->themeComboBox->addItem("Blue NCS", QChart::ChartThemeBlueNcs);
-    ui->themeComboBox->addItem("High Contrast", QChart::ChartThemeHighContrast);
-    ui->themeComboBox->addItem("Blue Icy", QChart::ChartThemeBlueIcy);
-    ui->themeComboBox->addItem("Qt", QChart::ChartThemeQt);
+    // ui->verticalLayout->insertStretch(0);
+    spacer = new QSpacerItem(0, 20, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding);
+    ui->verticalLayout->insertSpacerItem(0, spacer);
+}
 
-    //+ Set the colors from the light theme as default ones
-    QPalette pal = qApp->palette();
-    pal.setColor(QPalette::Window, QRgb(0xf0f0f0));
-    pal.setColor(QPalette::WindowText, QRgb(0x404044));
-    qApp->setPalette(pal);
-
-    // Test : add items to comboBox Test
+void MainWindow::populate_marqueurs()
+{
     for (int i = 0; i < 18; i++)
     {
-        ui->comboBox1->addItem(marqueurs[i].c_str(), i);
-        ui->comboBox2->addItem(marqueurs[i].c_str(), i);
+        ui->comboBoxMarqueur1->addItem(marqueurs[i].c_str(), i);
+        ui->comboBoxMarqueur2->addItem(marqueurs[i].c_str(), i);
     }
-    QObject::connect(ui->comboBox1, SIGNAL(activated(int)), this, SLOT(updateUI()));
-    QObject::connect(ui->comboBox2, SIGNAL(activated(int)), this, SLOT(updateUI()));
-    QObject::connect(ui->themeComboBox, SIGNAL(activated(int)), this, SLOT(updateUI()));
-    updateUI();
 }
 
-MainWindow::~MainWindow()
+void MainWindow::connect_signals_to_slots()
 {
-    delete ui;
+    QObject::connect(ui->comboBoxMarqueur1, SIGNAL(activated(int)), this, SLOT(replot()));
+    QObject::connect(ui->comboBoxMarqueur2, SIGNAL(activated(int)), this, SLOT(replot()));
+    QObject::connect(ui->themeComboBox, SIGNAL(activated(int)), this, SLOT(updateTheme()));
 }
 
-void MainWindow::updateUI()
+void MainWindow::replot()
 {
-    int marqueur_number_1 = ui->comboBox1->itemData(ui->comboBox1->currentIndex()).toInt();
-    int marqueur_number_2 = ui->comboBox2->itemData(ui->comboBox2->currentIndex()).toInt();
-    MainWindow::makePlot(marqueur_number_1, marqueur_number_2);
+    int marqueur_number_1 = ui->comboBoxMarqueur1->itemData(ui->comboBoxMarqueur1->currentIndex()).toInt();
+    int marqueur_number_2 = ui->comboBoxMarqueur2->itemData(ui->comboBoxMarqueur2->currentIndex()).toInt();
+    makePlot(marqueur_number_1, marqueur_number_2);
+}
 
+void MainWindow::updateTheme()
+{
     // Set palette colors based on selected theme
     QChart::ChartTheme theme = static_cast<QChart::ChartTheme>(
         ui->themeComboBox->itemData(ui->themeComboBox->currentIndex()).toInt());
@@ -125,8 +130,38 @@ void MainWindow::updateUI()
     window()->setPalette(pal);
 }
 
+void MainWindow::theme()
+{
+    //+ Populate themecombobox
+    ui->themeComboBox->addItem("Light", QChart::ChartThemeLight);
+    ui->themeComboBox->addItem("Blue Cerulean", QChart::ChartThemeBlueCerulean);
+    ui->themeComboBox->addItem("Dark", QChart::ChartThemeDark);
+    ui->themeComboBox->addItem("Brown Sand", QChart::ChartThemeBrownSand);
+    ui->themeComboBox->addItem("Blue NCS", QChart::ChartThemeBlueNcs);
+    ui->themeComboBox->addItem("High Contrast", QChart::ChartThemeHighContrast);
+    ui->themeComboBox->addItem("Blue Icy", QChart::ChartThemeBlueIcy);
+    ui->themeComboBox->addItem("Qt", QChart::ChartThemeQt);
+
+    //+ Set the colors from the light theme as default ones
+    QPalette pal = qApp->palette();
+    pal.setColor(QPalette::Window, QRgb(0xf0f0f0));
+    pal.setColor(QPalette::WindowText, QRgb(0x404044));
+    qApp->setPalette(pal);
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::updateUI()
+{
+}
+
 void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
 {
+    // ui->verticalLayout->removeItem(0);
+    ui->verticalLayout->removeItem(spacer);
     std::cout << "makePlot !" << std::endl;
     std::cout << "marqueur_number1 number is : " << marqueur_number_1 << ", marqueur_number2 number is : " << marqueur_number_2 << std::endl;
 
@@ -162,7 +197,7 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
 
     QCustomPlot *customPlot = new QCustomPlot;
 
-    ui->verticalLayout->insertWidget(0,customPlot);
+    ui->verticalLayout->insertWidget(0, customPlot);
 
     QCPGraph *curGraph = customPlot->addGraph();
     curGraph->setPen(drawPen);
@@ -199,4 +234,11 @@ void MainWindow::on_pushButton_2_clicked()
 void MainWindow::on_actionOpen_triggered()
 {
     qDebug() << "actionOpen_triggered !";
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                    tr("Open File"),
+                                                    "/home",
+                                                    tr("CSV files (*.csv)"));
+    std::cout << "Path to csv file is : " << fileName.toStdString() << std::endl;
+    
+    File csv_file(fileName.toStdString());
 }
