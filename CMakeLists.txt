@@ -13,6 +13,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(QT5_LIBRARIES Qt5::Widgets Qt5::PrintSupport Qt5::Charts)
 
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
 find_package(Qt5Charts)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5PrintSupport REQUIRED)
@@ -40,3 +42,7 @@ target_include_directories(Cytometrie_en_flux PRIVATE ./include)
 target_include_directories(Cytometrie_en_flux PRIVATE ./ui)
 
 target_link_libraries(Cytometrie_en_flux ${QT5_LIBRARIES})
+
+add_compile_definitions(QCUSTOMPLOT_USE_OPENGL)
+include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
+target_link_libraries(Cytometrie_en_flux ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})

@@ -2,11 +2,39 @@
 #define MAINWINDOW_HPP
 
 #include <QMainWindow>
+
+//#define QCUSTOMPLOT_USE_OPENGL
+
 #include "qcustomplot.h"
 #include <iostream>
 #include <QtCharts>
 #include <QtCharts/QChartGlobal>
 #include "File.hpp"
+#include "DataStruct.hpp"
+
+#include <QtCharts/QChartView>
+#include <QtCharts/QPieSeries>
+#include <QtCharts/QPieSlice>
+#include <QtCharts/QAbstractBarSeries>
+#include <QtCharts/QPercentBarSeries>
+#include <QtCharts/QStackedBarSeries>
+#include <QtCharts/QBarSeries>
+#include <QtCharts/QBarSet>
+#include <QtCharts/QLineSeries>
+#include <QtCharts/QSplineSeries>
+#include <QtCharts/QScatterSeries>
+#include <QtCharts/QAreaSeries>
+#include <QtCharts/QLegend>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QLabel>
+#include <QtCharts/QBarCategoryAxis>
+#include <QtWidgets/QApplication>
+#include <QtCharts/QValueAxis>
 
 #include <eigen3/Eigen/Dense>
 
@@ -26,10 +54,9 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent);
-    MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd *data_matrix);
     ~MainWindow();
     void theme();
-    void populate_marqueurs();
+    void populate_marqueurs(int nombre_de_marqueurs);
     void connect_signals_to_slots();
 
 public slots:
@@ -50,5 +77,7 @@ private:
     std::string *marqueurs;
     MatrixXd *m_visualisation;
     QSpacerItem *spacer;
+    DataStruct *data;
+    QCustomPlot *customPlot;
 };
 #endif // MAINWINDOW_HPP

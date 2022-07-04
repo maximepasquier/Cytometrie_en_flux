@@ -1,34 +1,10 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
-#include <QtCharts/QChartView>
-#include <QtCharts/QPieSeries>
-#include <QtCharts/QPieSlice>
-#include <QtCharts/QAbstractBarSeries>
-#include <QtCharts/QPercentBarSeries>
-#include <QtCharts/QStackedBarSeries>
-#include <QtCharts/QBarSeries>
-#include <QtCharts/QBarSet>
-#include <QtCharts/QLineSeries>
-#include <QtCharts/QSplineSeries>
-#include <QtCharts/QScatterSeries>
-#include <QtCharts/QAreaSeries>
-#include <QtCharts/QLegend>
-#include <QtWidgets/QGridLayout>
-#include <QtWidgets/QFormLayout>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QSpinBox>
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QGroupBox>
-#include <QtWidgets/QLabel>
-#include <QtCharts/QBarCategoryAxis>
-#include <QtWidgets/QApplication>
-#include <QtCharts/QValueAxis>
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->marqueurs = marqueurs;
+    // this->marqueurs = marqueurs;
     //! Matrice complète == matrice de visualisation
     // m_visualisation = data_matrix;
     theme();
@@ -41,25 +17,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // File csv_file;
 }
 
-MainWindow::MainWindow(QWidget *parent, std::string *marqueurs, MatrixXd *data_matrix)
-    : QMainWindow(parent), ui(new Ui::MainWindow)
+void MainWindow::populate_marqueurs(int nombre_de_marqueurs)
 {
-    ui->setupUi(this);
-    this->marqueurs = marqueurs;
-    //! Matrice complète == matrice de visualisation
-    m_visualisation = data_matrix;
-    theme();
-    populate_marqueurs();
-    connect_signals_to_slots();
-
-    // ui->verticalLayout->insertStretch(0);
-    spacer = new QSpacerItem(0, 20, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding);
-    ui->verticalLayout->insertSpacerItem(0, spacer);
-}
-
-void MainWindow::populate_marqueurs()
-{
-    for (int i = 0; i < 18; i++)
+    for (int i = 0; i < nombre_de_marqueurs; i++)
     {
         ui->comboBoxMarqueur1->addItem(marqueurs[i].c_str(), i);
         ui->comboBoxMarqueur2->addItem(marqueurs[i].c_str(), i);
@@ -189,20 +149,19 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
     // Set the pen style
     QPen drawPen;
     drawPen.setColor(Qt::red);
-    drawPen.setWidth(4);
+    drawPen.setWidth(1);
 
     QVector<double> latVector, lonVector;
     latVector << -75 << -50 << -50 << 0 << 50 << 100 << 75;
     lonVector << -75 << -50 << -25 << 0 << 25 << 50 << 75;
-
-    QCustomPlot *customPlot = new QCustomPlot;
 
     ui->verticalLayout->insertWidget(0, customPlot);
 
     QCPGraph *curGraph = customPlot->addGraph();
     curGraph->setPen(drawPen);
     curGraph->setLineStyle(QCPGraph::lsNone);
-    curGraph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 2));
+    //! Performances du scatterStyle ?
+    curGraph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 1));
     curGraph->setData(latVector, lonVector);
 
     // create graph and assign data to it:
@@ -218,6 +177,8 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
     customPlot->xAxis->setRange(first_column_minValues, first_column_maxValues);
     customPlot->yAxis->setRange(second_column_minValues, second_column_maxValues);
 
+
+    std::cout << "Replot time is : " << customPlot->replotTime() << std::endl;
     customPlot->replot();
 }
 
@@ -239,6 +200,17 @@ void MainWindow::on_actionOpen_triggered()
                                                     "/home",
                                                     tr("CSV files (*.csv)"));
     std::cout << "Path to csv file is : " << fileName.toStdString() << std::endl;
-    
+
     File csv_file(fileName.toStdString());
+    data = new DataStruct(csv_file);
+
+    marqueurs = data->get_marqueurs();
+    m_visualisation = data->get_data_matrix();
+    populate_marqueurs(data->get_number_of_columns());
+    customPlot = new QCustomPlot;
+    customPlot->setNoAntialiasingOnDrag(true);
+    //customPlot->setNotAntialiasedElement();
+    customPlot->setOpenGl(true);
+    std::cout << "Opengl ? : " << customPlot->openGl() << std::endl;
+    replot();
 }

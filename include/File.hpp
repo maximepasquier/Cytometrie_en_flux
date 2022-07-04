@@ -25,6 +25,8 @@ public:
     void read_matrix();
     std::string* get_marqueurs();
     MatrixXd* get_data_matrix();
+    int get_number_of_lines();
+    int get_number_of_columns();
 };
 
 #endif
