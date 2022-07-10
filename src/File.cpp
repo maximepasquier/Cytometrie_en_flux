@@ -4,6 +4,7 @@ File::File(std::string file_path)
 {
     // file_path = ".././testCSV.csv";
     this->file_path = file_path;
+    delimiter = ',';
     read_file_size();
     read_marqueurs();
     read_matrix();
@@ -23,7 +24,7 @@ void File::read_file_size()
     int nombre_de_colonnes = 0;
     getline(file, line);
     std::stringstream s(line);
-    while (getline(s, word, ','))
+    while (getline(s, word, delimiter))
     {
         nombre_de_colonnes++;
     }
@@ -46,7 +47,7 @@ void File::read_marqueurs()
     getline(file, line);
     std::stringstream s(line);
     int iterator = 0;
-    while (getline(s, word, ','))
+    while (getline(s, word, delimiter))
     {
         marqueurs[iterator++] = word;
     }
@@ -71,7 +72,7 @@ void File::read_matrix()
     while (getline(file, line))
     {
         std::stringstream s(line);
-        while (getline(s, word, ','))
+        while (getline(s, word, delimiter))
         {
             (*data_matrix)(ligne, colonne) = std::stod(word);
             colonne++;

@@ -17,6 +17,7 @@ private:
     int number_of_lines, number_of_columns;
     std::string* marqueurs;
     MatrixXd *data_matrix;
+    char delimiter;
 public:
     File(std::string file_path);
     ~File();

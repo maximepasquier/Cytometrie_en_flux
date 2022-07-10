@@ -166,6 +166,8 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
 
     // create graph and assign data to it:
     customPlot->addGraph();
+    //! AdaptiveSampling
+    customPlot->graph(0)->setAdaptiveSampling(false);
     customPlot->graph(0)->setData(first_column_QVector, second_column_QVector);
     customPlot->setInteraction(QCP::iRangeDrag, true);
     customPlot->setInteraction(QCP::iRangeZoom, true);
@@ -176,7 +178,6 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
     // set axes ranges, so we see all data:
     customPlot->xAxis->setRange(first_column_minValues, first_column_maxValues);
     customPlot->yAxis->setRange(second_column_minValues, second_column_maxValues);
-
 
     std::cout << "Replot time is : " << customPlot->replotTime() << std::endl;
     customPlot->replot();
@@ -208,8 +209,10 @@ void MainWindow::on_actionOpen_triggered()
     m_visualisation = data->get_data_matrix();
     populate_marqueurs(data->get_number_of_columns());
     customPlot = new QCustomPlot;
+    // QCPGraph *customPlot_graph = customPlot->addGraph();
+    // customPlot_graph->setAdaptiveSampling(false);
     customPlot->setNoAntialiasingOnDrag(true);
-    //customPlot->setNotAntialiasedElement();
+    //! Set OpenGL
     customPlot->setOpenGl(true);
     std::cout << "Opengl ? : " << customPlot->openGl() << std::endl;
     replot();
