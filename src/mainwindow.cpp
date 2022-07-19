@@ -4,17 +4,16 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    // this->marqueurs = marqueurs;
-    //! Matrice complète == matrice de visualisation
-    // m_visualisation = data_matrix;
+    this->setWindowTitle("Cytométrie en flux");
     theme();
-    // populate_marqueurs();
     connect_signals_to_slots();
+    setupSpacer();
+}
 
+void MainWindow::setupSpacer()
+{
     spacer = new QSpacerItem(0, 20, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding);
     ui->verticalLayout->insertSpacerItem(0, spacer);
-
-    // File csv_file;
 }
 
 void MainWindow::populate_marqueurs(int nombre_de_marqueurs)
@@ -114,13 +113,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::updateUI()
-{
-}
-
 void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
 {
-    // ui->verticalLayout->removeItem(0);
     ui->verticalLayout->removeItem(spacer);
     std::cout << "makePlot !" << std::endl;
     std::cout << "marqueur_number1 number is : " << marqueur_number_1 << ", marqueur_number2 number is : " << marqueur_number_2 << std::endl;
@@ -166,8 +160,6 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
 
     // create graph and assign data to it:
     customPlot->addGraph();
-    //! AdaptiveSampling
-    customPlot->graph(0)->setAdaptiveSampling(false);
     customPlot->graph(0)->setData(first_column_QVector, second_column_QVector);
     customPlot->setInteraction(QCP::iRangeDrag, true);
     customPlot->setInteraction(QCP::iRangeZoom, true);
@@ -183,16 +175,6 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
     customPlot->replot();
 }
 
-void MainWindow::on_pushButton_clicked()
-{
-    qDebug() << "pushButton_clicked !";
-}
-
-void MainWindow::on_pushButton_2_clicked()
-{
-    qDebug() << "pushButton_2_clicked !";
-}
-
 void MainWindow::on_actionOpen_triggered()
 {
     qDebug() << "actionOpen_triggered !";
@@ -203,17 +185,45 @@ void MainWindow::on_actionOpen_triggered()
     std::cout << "Path to csv file is : " << fileName.toStdString() << std::endl;
 
     File csv_file(fileName.toStdString());
-    data = new DataStruct(csv_file);
+    dataSet = new DataStruct(csv_file);
 
-    marqueurs = data->get_marqueurs();
-    m_visualisation = data->get_data_matrix();
-    populate_marqueurs(data->get_number_of_columns());
+    marqueurs = dataSet->get_marqueurs();
+    m_visualisation = dataSet->get_data_matrix();
+    populate_marqueurs(dataSet->get_number_of_columns());
     customPlot = new QCustomPlot;
-    // QCPGraph *customPlot_graph = customPlot->addGraph();
-    // customPlot_graph->setAdaptiveSampling(false);
     customPlot->setNoAntialiasingOnDrag(true);
-    //! Set OpenGL
-    customPlot->setOpenGl(true);
-    std::cout << "Opengl ? : " << customPlot->openGl() << std::endl;
     replot();
+}
+
+void MainWindow::on_setAdaptativeSampling_stateChanged(int arg1)
+{
+    //! AdaptiveSampling
+    if (arg1 == Qt::Checked)
+    {
+        customPlot->graph(0)->setAdaptiveSampling(true);
+        qDebug() << "Adaptive Sampling on !";
+        replot();
+    }
+    else if (arg1 == Qt::Unchecked)
+    {
+        customPlot->graph(0)->setAdaptiveSampling(false);
+        qDebug() << "Adaptive Sampling off !";
+        replot();
+    }
+}
+void MainWindow::on_setOpenGL_stateChanged(int arg1)
+{
+    //! OpenGL
+    if (arg1 == Qt::Checked)
+    {
+        customPlot->setOpenGl(true);
+        qDebug() << "OpenGL on !";
+        replot();
+    }
+    else if (arg1 == Qt::Unchecked)
+    {
+        customPlot->setOpenGl(false);
+        qDebug() << "OpenGL off !";
+        replot();
+    }
 }

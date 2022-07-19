@@ -7,7 +7,7 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
-class DataStruct
+class DataStruct : MatrixXd
 {
 private:
     int number_of_lines, number_of_columns;

@@ -58,26 +58,27 @@ public:
     void theme();
     void populate_marqueurs(int nombre_de_marqueurs);
     void connect_signals_to_slots();
+    void setupSpacer();
 
 public slots:
     void makePlot(int marqueur_number_1, int marqueur_number_2);
 
 private slots:
-    void updateUI();
     void updateTheme();
     void replot();
 
-    void on_pushButton_clicked();
-    void on_pushButton_2_clicked();
-
     void on_actionOpen_triggered();
+
+    void on_setAdaptativeSampling_stateChanged(int arg1);
+
+    void on_setOpenGL_stateChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;
     std::string *marqueurs;
     MatrixXd *m_visualisation;
     QSpacerItem *spacer;
-    DataStruct *data;
+    DataStruct *dataSet;
     QCustomPlot *customPlot;
 };
 #endif // MAINWINDOW_HPP
