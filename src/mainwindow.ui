@@ -26,6 +26,23 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="setOpenGL">
+        <property name="text">
+         <string>OpenGL</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="setAdaptativeSampling">
+        <property name="text">
+         <string>Adaptive Sampling</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
@@ -33,7 +50,10 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2" rowspan="2">
+      <item row="1" column="0">
+       <widget class="QComboBox" name="themeComboBox"/>
+      </item>
+      <item row="0" column="2" rowspan="3">
        <layout class="QFormLayout" name="formLayout">
         <item row="0" column="0">
          <widget class="QLabel" name="label_2">
@@ -63,23 +83,10 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="0">
-       <widget class="QComboBox" name="themeComboBox"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QCheckBox" name="setAdaptativeSampling">
+      <item row="2" column="1">
+       <widget class="QPushButton" name="DrawEllipse">
         <property name="text">
-         <string>Adaptive Sampling</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="setOpenGL">
-        <property name="text">
-         <string>OpenGL</string>
+         <string>Draw Ellipse</string>
         </property>
        </widget>
       </item>

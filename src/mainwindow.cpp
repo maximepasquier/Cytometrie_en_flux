@@ -193,6 +193,37 @@ void MainWindow::on_actionOpen_triggered()
     customPlot = new QCustomPlot;
     customPlot->setNoAntialiasingOnDrag(true);
     replot();
+
+    //* Layer
+    //cursorLayer = new QCPLayer(customPlot, "cursorLayer");
+    customPlot->addLayer("cursorLayer", 0, QCustomPlot::limAbove);
+    cursorLayer = customPlot->layer("cursorLayer");
+    cursorLayer->setMode(QCPLayer::lmBuffered);
+}
+
+void MainWindow::plotMouseClick(QMouseEvent *e)
+{
+    if (e->button() == Qt::LeftButton)
+    {
+        qDebug() << "LeftClick" << e->pos();
+        m_selectionCircle->setVisible(true);
+        m_selectionCircle->setClipToAxisRect(false);
+        int x = customPlot->xAxis->pixelToCoord(e->pos().x());
+        int y = customPlot->yAxis->pixelToCoord(e->pos().y());
+
+        m_selectionCircle->topLeft->setCoords(x, y);
+        m_selectionCircle->bottomRight->setCoords(x + 1, y + 1);
+    }
+}
+
+void MainWindow::plotMouseMove(QMouseEvent *e)
+{
+    qDebug() << "Mouse moved";
+    int x = customPlot->xAxis->pixelToCoord(e->pos().x());
+    int y = customPlot->yAxis->pixelToCoord(e->pos().y());
+    m_selectionCircle->bottomRight->setCoords(x, y);
+    // customPlot->replot();
+    cursorLayer->replot();
 }
 
 void MainWindow::on_setAdaptativeSampling_stateChanged(int arg1)
@@ -226,4 +257,19 @@ void MainWindow::on_setOpenGL_stateChanged(int arg1)
         qDebug() << "OpenGL off !";
         replot();
     }
+}
+
+void MainWindow::on_DrawEllipse_clicked()
+{
+    m_selectionCircle = new QCPItemEllipse(customPlot);
+    m_selectionCircle->setVisible(false);
+    m_selectionCircle->setPen(QPen(Qt::black)); // show black border around text
+    m_selectionCircle->setBrush(Qt::NoBrush);
+    m_selectionCircle->setLayer(cursorLayer);
+
+    connect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClick(QMouseEvent *)));
+    connect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMove(QMouseEvent *)));
+
+    customPlot->setInteraction(QCP::iRangeDrag, false);
+    customPlot->setInteraction(QCP::iRangeZoom, false);
 }

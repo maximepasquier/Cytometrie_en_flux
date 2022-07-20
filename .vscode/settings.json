@@ -59,6 +59,7 @@
     "variant": "cpp",
     "bit": "cpp",
     "qgridlayout": "cpp",
-    "qcombobox": "cpp"
+    "qcombobox": "cpp",
+    "dense": "cpp"
   }
 }

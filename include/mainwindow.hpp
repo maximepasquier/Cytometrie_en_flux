@@ -62,6 +62,8 @@ public:
 
 public slots:
     void makePlot(int marqueur_number_1, int marqueur_number_2);
+    void plotMouseClick(QMouseEvent * e);
+    void plotMouseMove(QMouseEvent * e);
 
 private slots:
     void updateTheme();
@@ -73,6 +75,8 @@ private slots:
 
     void on_setOpenGL_stateChanged(int arg1);
 
+    void on_DrawEllipse_clicked();
+
 private:
     Ui::MainWindow *ui;
     std::string *marqueurs;
@@ -80,5 +84,7 @@ private:
     QSpacerItem *spacer;
     DataStruct *dataSet;
     QCustomPlot *customPlot;
+    QCPItemEllipse *m_selectionCircle;
+    QCPLayer * cursorLayer;
 };
 #endif // MAINWINDOW_HPP
