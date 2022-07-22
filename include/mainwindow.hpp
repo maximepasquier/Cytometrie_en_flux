@@ -77,7 +77,11 @@ private slots:
 
     void on_DrawEllipse_clicked();
 
+    void on_validateDrawing_clicked();
+
 private:
+    bool user_is_drawing;
+    bool draw_ellipse;
     Ui::MainWindow *ui;
     std::string *marqueurs;
     MatrixXd *m_visualisation;

@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     theme();
     connect_signals_to_slots();
     setupSpacer();
+    user_is_drawing = false;
+    draw_ellipse = false;
 }
 
 void MainWindow::setupSpacer()
@@ -195,7 +197,7 @@ void MainWindow::on_actionOpen_triggered()
     replot();
 
     //* Layer
-    //cursorLayer = new QCPLayer(customPlot, "cursorLayer");
+    // cursorLayer = new QCPLayer(customPlot, "cursorLayer");
     customPlot->addLayer("cursorLayer", 0, QCustomPlot::limAbove);
     cursorLayer = customPlot->layer("cursorLayer");
     cursorLayer->setMode(QCPLayer::lmBuffered);
@@ -203,27 +205,40 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::plotMouseClick(QMouseEvent *e)
 {
-    if (e->button() == Qt::LeftButton)
+    if (draw_ellipse)
     {
-        qDebug() << "LeftClick" << e->pos();
-        m_selectionCircle->setVisible(true);
-        m_selectionCircle->setClipToAxisRect(false);
-        int x = customPlot->xAxis->pixelToCoord(e->pos().x());
-        int y = customPlot->yAxis->pixelToCoord(e->pos().y());
-
-        m_selectionCircle->topLeft->setCoords(x, y);
-        m_selectionCircle->bottomRight->setCoords(x + 1, y + 1);
+        if (e->button() == Qt::LeftButton)
+        {
+            qDebug() << "fix LeftClick" << e->pos();
+        }
     }
+    else
+    {
+        if (e->button() == Qt::LeftButton)
+        {
+            qDebug() << "LeftClick" << e->pos();
+            m_selectionCircle->setVisible(true);
+            m_selectionCircle->setClipToAxisRect(false);
+            int x = customPlot->xAxis->pixelToCoord(e->pos().x());
+            int y = customPlot->yAxis->pixelToCoord(e->pos().y());
+
+            m_selectionCircle->topLeft->setCoords(x, y);
+            m_selectionCircle->bottomRight->setCoords(x + 1, y + 1);
+        }
+    }
+    draw_ellipse = !draw_ellipse;
 }
 
 void MainWindow::plotMouseMove(QMouseEvent *e)
 {
-    qDebug() << "Mouse moved";
-    int x = customPlot->xAxis->pixelToCoord(e->pos().x());
-    int y = customPlot->yAxis->pixelToCoord(e->pos().y());
-    m_selectionCircle->bottomRight->setCoords(x, y);
-    // customPlot->replot();
-    cursorLayer->replot();
+    if (draw_ellipse)
+    {
+        qDebug() << "Mouse moved";
+        int x = customPlot->xAxis->pixelToCoord(e->pos().x());
+        int y = customPlot->yAxis->pixelToCoord(e->pos().y());
+        m_selectionCircle->bottomRight->setCoords(x, y);
+        cursorLayer->replot();
+    }
 }
 
 void MainWindow::on_setAdaptativeSampling_stateChanged(int arg1)
@@ -261,15 +276,53 @@ void MainWindow::on_setOpenGL_stateChanged(int arg1)
 
 void MainWindow::on_DrawEllipse_clicked()
 {
-    m_selectionCircle = new QCPItemEllipse(customPlot);
-    m_selectionCircle->setVisible(false);
-    m_selectionCircle->setPen(QPen(Qt::black)); // show black border around text
-    m_selectionCircle->setBrush(Qt::NoBrush);
-    m_selectionCircle->setLayer(cursorLayer);
+    if (user_is_drawing)
+    {
+        ui->DrawEllipse->setChecked(false);
+        delete m_selectionCircle;
 
-    connect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClick(QMouseEvent *)));
-    connect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMove(QMouseEvent *)));
+        disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClick(QMouseEvent *)));
+        disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMove(QMouseEvent *)));
 
-    customPlot->setInteraction(QCP::iRangeDrag, false);
-    customPlot->setInteraction(QCP::iRangeZoom, false);
+        customPlot->setInteraction(QCP::iRangeDrag, true);
+        customPlot->setInteraction(QCP::iRangeZoom, true);
+    }
+    else
+    {
+        ui->DrawEllipse->setChecked(true);
+        m_selectionCircle = new QCPItemEllipse(customPlot);
+        m_selectionCircle->setVisible(false);
+        m_selectionCircle->setPen(QPen(Qt::black)); // show black border around text
+        m_selectionCircle->setBrush(Qt::NoBrush);
+        m_selectionCircle->setLayer(cursorLayer);
+
+        connect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClick(QMouseEvent *)));
+        connect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMove(QMouseEvent *)));
+
+        customPlot->setInteraction(QCP::iRangeDrag, false);
+        customPlot->setInteraction(QCP::iRangeZoom, false);
+    }
+    // Switch status of user_is_drawing
+    user_is_drawing = !user_is_drawing;
+    customPlot->replot();
+}
+void MainWindow::on_validateDrawing_clicked()
+{
+    if(m_selectionCircle == nullptr)
+    {
+        qDebug() << "No shape drawn !";
+    }
+    else
+    {
+        //std::cout << m_selectionCircle->topLeft << std::endl;
+        /*
+        QCPItemPosition *x1,*x2,*y1,*y2;
+        x1 = m_selectionCircle->topLeft;
+        x2 = m_selectionCircle->top;
+        y1 = m_selectionCircle->top;
+        y2 = m_selectionCircle->bottom;
+        double a = x1->value();
+        std::cout << a << std::endl;
+        */
+    }
 }
