@@ -36,10 +36,17 @@
 #include <QtWidgets/QApplication>
 #include <QtCharts/QValueAxis>
 
+#include <QTimer>
+
 #include <eigen3/Eigen/Dense>
+#include <chrono>
+#include <thread>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+
+using namespace std::this_thread;
+using namespace std::chrono;
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -62,26 +69,30 @@ public:
 
 public slots:
     void makePlot(int marqueur_number_1, int marqueur_number_2);
-    void plotMouseClick(QMouseEvent * e);
-    void plotMouseMove(QMouseEvent * e);
+    void plotMouseClick(QMouseEvent *e);
+    void mousePressed(QMouseEvent *e);
+    void mouseReleased(QMouseEvent *e);
+    void plotMouseMove(QMouseEvent *e);
+    void wheelMoved(QWheelEvent *);
+    void wheelStopped();
 
 private slots:
     void updateTheme();
     void replot();
-
     void on_actionOpen_triggered();
-
     void on_setAdaptativeSampling_stateChanged(int arg1);
-
     void on_setOpenGL_stateChanged(int arg1);
-
     void on_DrawEllipse_clicked();
-
     void on_validateDrawing_clicked();
+    void on_setAdaptativeSampling_activated();
+    void connect_adaptive_sampling_on_idle();
+    void disconnect_adaptive_sampling_on_idle();
 
 private:
     bool user_is_drawing;
     bool draw_ellipse;
+    bool adaptative_sampling_on_idle;
+    bool mouse_wheel_is_turning;
     Ui::MainWindow *ui;
     std::string *marqueurs;
     MatrixXd *m_visualisation;
@@ -89,6 +100,6 @@ private:
     DataStruct *dataSet;
     QCustomPlot *customPlot;
     QCPItemEllipse *m_selectionCircle;
-    QCPLayer * cursorLayer;
+    QCPLayer *cursorLayer;
 };
 #endif // MAINWINDOW_HPP

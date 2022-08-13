@@ -10,6 +10,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setupSpacer();
     user_is_drawing = false;
     draw_ellipse = false;
+    adaptative_sampling_on_idle = false;
+    mouse_wheel_is_turning = false;
+    // Populate for adaptivesampling
+    ui->setAdaptativeSampling->addItem("ON", 0);
+    ui->setAdaptativeSampling->addItem("OFF", 1);
+    ui->setAdaptativeSampling->addItem("IDLE", 2);
 }
 
 void MainWindow::setupSpacer()
@@ -144,7 +150,7 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
 
     // Set the pen style
     QPen drawPen;
-    drawPen.setColor(Qt::red);
+    drawPen.setColor(Qt::black);
     drawPen.setWidth(1);
 
     QVector<double> latVector, lonVector;
@@ -154,6 +160,16 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
     ui->verticalLayout->insertWidget(0, customPlot);
 
     QCPGraph *curGraph = customPlot->addGraph();
+    curGraph->setPen(drawPen);
+    /*
+    QLinearGradient lGrad(QPointF(0, 0), QPointF(0, 500));
+    lGrad.setColorAt(0, QColor(Qt::red));
+    lGrad.setColorAt(1, QColor(Qt::green));
+    QBrush lBrush(lGrad);
+    QPen myPen;
+    myPen.setBrush(lBrush);
+    curGraph->setPen(myPen);
+    */
     curGraph->setPen(drawPen);
     curGraph->setLineStyle(QCPGraph::lsNone);
     //! Performances du scatterStyle ?
@@ -201,6 +217,64 @@ void MainWindow::on_actionOpen_triggered()
     customPlot->addLayer("cursorLayer", 0, QCustomPlot::limAbove);
     cursorLayer = customPlot->layer("cursorLayer");
     cursorLayer->setMode(QCPLayer::lmBuffered);
+
+    //connect_adaptive_sampling_on_idle();
+    
+}
+
+void MainWindow::connect_adaptive_sampling_on_idle()
+{
+    //* connect AdaptiveSampling on Idle
+    connect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(mousePressed(QMouseEvent *)));
+    connect(customPlot, SIGNAL(mouseRelease(QMouseEvent *)), this, SLOT(mouseReleased(QMouseEvent *)));
+    connect(customPlot, SIGNAL(mouseWheel(QWheelEvent *)), this, SLOT(wheelMoved(QWheelEvent *)));
+}
+
+void MainWindow::disconnect_adaptive_sampling_on_idle()
+{
+    //* disconnect AdaptiveSampling on Idle
+    disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(mousePressed(QMouseEvent *)));
+    disconnect(customPlot, SIGNAL(mouseRelease(QMouseEvent *)), this, SLOT(mouseReleased(QMouseEvent *)));
+    disconnect(customPlot, SIGNAL(mouseWheel(QWheelEvent *)), this, SLOT(wheelMoved(QWheelEvent *)));
+}
+
+void MainWindow::wheelMoved(QWheelEvent *)
+{
+    qDebug() << "Wheel moved !";
+    if (!mouse_wheel_is_turning)
+    {
+        QTimer::singleShot(2000, this, SLOT(wheelStopped()));
+        mouse_wheel_is_turning = true;
+        customPlot->graph(0)->setAdaptiveSampling(true);
+    }
+}
+
+void MainWindow::wheelStopped()
+{
+    qDebug() << "Wheel stopped !";
+    mouse_wheel_is_turning = false;
+    customPlot->graph(0)->setAdaptiveSampling(false);
+    customPlot->replot();
+}
+
+void MainWindow::mouseReleased(QMouseEvent *e)
+{
+    qDebug() << "mouseRelease !";
+    if (adaptative_sampling_on_idle)
+    {
+        customPlot->graph(0)->setAdaptiveSampling(false);
+        customPlot->replot();
+    }
+}
+
+void MainWindow::mousePressed(QMouseEvent *e)
+{
+    qDebug() << "mousePressed !";
+    if (adaptative_sampling_on_idle)
+    {
+        customPlot->graph(0)->setAdaptiveSampling(true);
+        customPlot->replot();
+    }
 }
 
 void MainWindow::plotMouseClick(QMouseEvent *e)
@@ -257,6 +331,34 @@ void MainWindow::on_setAdaptativeSampling_stateChanged(int arg1)
         replot();
     }
 }
+
+void MainWindow::on_setAdaptativeSampling_activated()
+{
+    int index = ui->setAdaptativeSampling->itemData(ui->setAdaptativeSampling->currentIndex()).toInt();
+    // qDebug() << index;
+    adaptative_sampling_on_idle = false;
+    disconnect_adaptive_sampling_on_idle();
+    if (index == 0) // ON
+    {
+        customPlot->graph(0)->setAdaptiveSampling(true);
+        qDebug() << "Adaptive Sampling on !";
+        replot();
+    }
+    else if (index == 1) // OFF
+    {
+        customPlot->graph(0)->setAdaptiveSampling(false);
+        qDebug() << "Adaptive Sampling off !";
+        replot();
+    }
+    else if (index == 2) // IDLE
+    {
+        adaptative_sampling_on_idle = true;
+        qDebug() << "Adaptive Sampling on idle !";
+        connect_adaptive_sampling_on_idle();
+        replot();
+    }
+}
+
 void MainWindow::on_setOpenGL_stateChanged(int arg1)
 {
     //! OpenGL
@@ -278,6 +380,7 @@ void MainWindow::on_DrawEllipse_clicked()
 {
     if (user_is_drawing)
     {
+        connect_adaptive_sampling_on_idle();
         ui->DrawEllipse->setChecked(false);
         delete m_selectionCircle;
 
@@ -289,10 +392,11 @@ void MainWindow::on_DrawEllipse_clicked()
     }
     else
     {
+        disconnect_adaptive_sampling_on_idle();
         ui->DrawEllipse->setChecked(true);
         m_selectionCircle = new QCPItemEllipse(customPlot);
         m_selectionCircle->setVisible(false);
-        m_selectionCircle->setPen(QPen(Qt::black)); // show black border around text
+        m_selectionCircle->setPen(QPen(Qt::red));
         m_selectionCircle->setBrush(Qt::NoBrush);
         m_selectionCircle->setLayer(cursorLayer);
 
@@ -308,13 +412,21 @@ void MainWindow::on_DrawEllipse_clicked()
 }
 void MainWindow::on_validateDrawing_clicked()
 {
-    if(m_selectionCircle == nullptr)
+    if (m_selectionCircle == nullptr)
     {
         qDebug() << "No shape drawn !";
     }
     else
     {
-        //std::cout << m_selectionCircle->topLeft << std::endl;
+        ui->DrawEllipse->setChecked(false);
+
+        disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClick(QMouseEvent *)));
+        disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMove(QMouseEvent *)));
+
+        customPlot->setInteraction(QCP::iRangeDrag, true);
+        customPlot->setInteraction(QCP::iRangeZoom, true);
+        connect_adaptive_sampling_on_idle();
+        // std::cout << m_selectionCircle->topLeft << std::endl;
         /*
         QCPItemPosition *x1,*x2,*y1,*y2;
         x1 = m_selectionCircle->topLeft;
