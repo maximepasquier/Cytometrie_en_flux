@@ -98,6 +98,7 @@ private:
     MatrixXd *m_visualisation;
     QSpacerItem *spacer;
     DataStruct *dataSet;
+    QCPGraph *curGraph;
     QCustomPlot *customPlot;
     QCPItemEllipse *m_selectionCircle;
     QCPLayer *cursorLayer;

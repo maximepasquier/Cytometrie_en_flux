@@ -6,6 +6,7 @@ DataStruct::DataStruct(File file)
     marqueurs = file.get_marqueurs();
     number_of_lines = file.get_number_of_lines();
     number_of_columns = file.get_number_of_columns();
+    init_gated_data_array();
 }
 
 DataStruct::~DataStruct()
@@ -28,4 +29,19 @@ int DataStruct::get_number_of_lines()
 int DataStruct::get_number_of_columns()
 {
     return number_of_columns;
+}
+
+bool *DataStruct::get_gated_data_array()
+{
+    return gated_data_array;
+}
+
+void DataStruct::init_gated_data_array()
+{
+    gated_data_array = new bool[number_of_lines];
+    for (size_t i = 0; i < number_of_lines; i++)
+    {
+        // All data not gated yet
+        gated_data_array[i] = false;
+    }
 }

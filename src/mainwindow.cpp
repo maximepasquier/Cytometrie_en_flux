@@ -159,7 +159,6 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
 
     ui->verticalLayout->insertWidget(0, customPlot);
 
-    QCPGraph *curGraph = customPlot->addGraph();
     curGraph->setPen(drawPen);
     /*
     QLinearGradient lGrad(QPointF(0, 0), QPointF(0, 500));
@@ -178,7 +177,7 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
 
     // create graph and assign data to it:
     customPlot->addGraph();
-    customPlot->graph(0)->setData(first_column_QVector, second_column_QVector);
+    customPlot->graph(0)->setData(first_column_QVector, second_column_QVector, dataSet->get_gated_data_array());
     customPlot->setInteraction(QCP::iRangeDrag, true);
     customPlot->setInteraction(QCP::iRangeZoom, true);
 
@@ -210,7 +209,7 @@ void MainWindow::on_actionOpen_triggered()
     populate_marqueurs(dataSet->get_number_of_columns());
     customPlot = new QCustomPlot;
     customPlot->setNoAntialiasingOnDrag(true);
-    replot();
+    curGraph = customPlot->addGraph();
 
     //* Layer
     // cursorLayer = new QCPLayer(customPlot, "cursorLayer");
@@ -218,8 +217,9 @@ void MainWindow::on_actionOpen_triggered()
     cursorLayer = customPlot->layer("cursorLayer");
     cursorLayer->setMode(QCPLayer::lmBuffered);
 
-    //connect_adaptive_sampling_on_idle();
-    
+    replot();
+
+    // connect_adaptive_sampling_on_idle();
 }
 
 void MainWindow::connect_adaptive_sampling_on_idle()
