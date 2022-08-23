@@ -130,8 +130,8 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
     //* Select columns
     int first_column_number = marqueur_number_1;
     int second_column_number = marqueur_number_2;
-    VectorXd first_column = m_visualisation->col(first_column_number);
-    VectorXd second_column = m_visualisation->col(second_column_number);
+    first_column = m_visualisation->col(first_column_number);
+    second_column = m_visualisation->col(second_column_number);
 
     //* Convert VectorXd to std::vector to Qvector...
     std::vector<double> first_column_std_vector(first_column.data(), first_column.data() + first_column.rows() * first_column.cols());
@@ -427,14 +427,42 @@ void MainWindow::on_validateDrawing_clicked()
         customPlot->setInteraction(QCP::iRangeZoom, true);
         connect_adaptive_sampling_on_idle();
         // std::cout << m_selectionCircle->topLeft << std::endl;
-        /*
-        QCPItemPosition *x1,*x2,*y1,*y2;
-        x1 = m_selectionCircle->topLeft;
-        x2 = m_selectionCircle->top;
-        y1 = m_selectionCircle->top;
-        y2 = m_selectionCircle->bottom;
-        double a = x1->value();
-        std::cout << a << std::endl;
-        */
+
+        QCPItemPosition *x1y1, *x2y2;
+        x1y1 = m_selectionCircle->topLeft;
+        x2y2 = m_selectionCircle->bottomRight;
+
+        gating(x1y1, x2y2);
     }
+}
+
+void MainWindow::gating(QCPItemPosition *x1y1, QCPItemPosition *x2y2)
+{
+    bool *gated_data_array = dataSet->get_gated_data_array();
+    int x1 = x1y1->key();
+    int y1 = x1y1->value();
+    int x2 = x2y2->key();
+    int y2 = x2y2->value();
+    Coords center;
+    int rayon_horizontal;
+    int rayon_vertical;
+    center.x = int((x1 + x2) / 2);
+    center.y = int((y1 + y2) / 2);
+    rayon_horizontal = int(int(abs(x1 - x2)) / 2);
+    rayon_vertical = int(int(abs(y1 - y2)) / 2);
+    qDebug() << x1 << " " << y1;
+    for (size_t i = 0; i < first_column.size(); i++)
+    {
+        /*
+        if(first_column[i] > 100 && first_column[i] < 200 && second_column[i] > 100 & second_column[i] < 200)
+        {
+            gated_data_array[i] = true;
+        }
+        */
+        if (pow((first_column[i] - center.x), 2) / pow(rayon_horizontal, 2) + pow((second_column[i] - center.y), 2) / pow(rayon_vertical, 2) < 1)
+        {
+            gated_data_array[i] = true;
+        }
+    }
+    replot();
 }

@@ -41,6 +41,7 @@
 #include <eigen3/Eigen/Dense>
 #include <chrono>
 #include <thread>
+#include <cmath>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -55,6 +56,11 @@ namespace Ui
 }
 QT_END_NAMESPACE
 
+struct Coords
+{
+    int x, y;
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -66,6 +72,7 @@ public:
     void populate_marqueurs(int nombre_de_marqueurs);
     void connect_signals_to_slots();
     void setupSpacer();
+    void gating(QCPItemPosition *x1y1, QCPItemPosition *x2y2);
 
 public slots:
     void makePlot(int marqueur_number_1, int marqueur_number_2);
@@ -93,6 +100,8 @@ private:
     bool draw_ellipse;
     bool adaptative_sampling_on_idle;
     bool mouse_wheel_is_turning;
+    VectorXd first_column;
+    VectorXd second_column;
     Ui::MainWindow *ui;
     std::string *marqueurs;
     MatrixXd *m_visualisation;
