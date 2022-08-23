@@ -2748,7 +2748,6 @@ public:
   bool autoSqueeze() const { return mAutoSqueeze; }
   bool *get_gated_data_array() const
   {
-    qDebug() << "get " << mgated_data_array;
     return mgated_data_array;
   };
 
@@ -2997,7 +2996,6 @@ void QCPDataContainer<DataType>::set(const QVector<DataType> &data, bool *gated_
   mPreallocSize = 0;
   mPreallocIteration = 0;
   mgated_data_array = gated_data_array;
-  qDebug() << "set " << mgated_data_array;
   if (!alreadySorted)
     sort();
 }
@@ -3102,10 +3100,6 @@ void QCPDataContainer<DataType>::add(const QVector<DataType> &data, bool *gated_
       std::sort(end() - n, end(), qcpLessThanSortKey<DataType>);
     if (oldSize > 0 && !qcpLessThanSortKey<DataType>(*(constEnd() - n - 1), *(constEnd() - n))) // if appended range keys aren't all greater than existing ones, merge the two partitions
       std::inplace_merge(begin(), end() - n, end(), qcpLessThanSortKey<DataType>);
-  }
-  for (size_t i = 0; i < mData.size(); i++)
-  {
-    qDebug() << i;
   }
 }
 
@@ -5679,6 +5673,7 @@ public:
   inline QCPRange valueRange() const { return QCPRange(value, value); }
 
   double key, value;
+  bool gated;
 };
 Q_DECLARE_TYPEINFO(QCPGraphData, Q_PRIMITIVE_TYPE);
 
@@ -5725,6 +5720,13 @@ public:
     lsImpulse ///< each data point is represented by a line parallel to the value axis, which reaches from the data point to the zero-value-line
   };
   Q_ENUMS(LineStyle)
+
+  struct scatters_gated_struct
+  {
+    QVector<QPointF> scatters_gated;
+    std::vector<bool> gated;
+  };
+  
 
   explicit QCPGraph(QCPAxis *keyAxis, QCPAxis *valueAxis);
   virtual ~QCPGraph() Q_DECL_OVERRIDE;
@@ -5773,7 +5775,7 @@ protected:
   // introduced virtual methods:
   virtual void drawFill(QCPPainter *painter, QVector<QPointF> *lines) const;
   virtual void drawScatterPlot(QCPPainter *painter, const QVector<QPointF> &scatters, const QCPScatterStyle &style) const;
-  virtual void drawScatterPlot(QCPPainter *painter, bool *gated_data_array, const QVector<QPointF> &scatters, const QCPScatterStyle &style) const;
+  virtual void drawScatterPlot(QCPPainter *painter, scatters_gated_struct scatter_struct, const QCPScatterStyle &style) const;
   virtual void drawLinePlot(QCPPainter *painter, const QVector<QPointF> &lines) const;
   virtual void drawImpulsePlot(QCPPainter *painter, const QVector<QPointF> &lines) const;
 
@@ -5785,7 +5787,7 @@ protected:
   void getVisibleDataBounds(QCPGraphDataContainer::const_iterator &begin, QCPGraphDataContainer::const_iterator &end, const QCPDataRange &rangeRestriction) const;
   void getLines(QVector<QPointF> *lines, const QCPDataRange &dataRange) const;
   void getScatters(QVector<QPointF> *scatters, const QCPDataRange &dataRange) const;
-  void getScatters(QVector<QPointF> *scatters, bool *gated_data_array, std::vector<int> *sampled_gated_data_index_array, const QCPDataRange &dataRange) const;
+  void getScatters(scatters_gated_struct *scatter_struct, const QCPDataRange &dataRange) const;
   QVector<QPointF> dataToLines(const QVector<QCPGraphData> &data) const;
   QVector<QPointF> dataToStepLeftLines(const QVector<QCPGraphData> &data) const;
   QVector<QPointF> dataToStepRightLines(const QVector<QCPGraphData> &data) const;

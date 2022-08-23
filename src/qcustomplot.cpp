@@ -21429,6 +21429,7 @@ void QCPGraph::addData(const QVector<double> &keys, const QVector<double> &value
   {
     it->key = keys[i];
     it->value = values[i];
+    it->gated = *(gated_data_array + i);
     ++it;
     ++i;
   }
@@ -21503,6 +21504,19 @@ void QCPGraph::draw(QCPPainter *painter)
     return;
 
   QVector<QPointF> lines, scatters; // line and (if necessary) scatter pixel coordinates will be stored here while iterating over segments
+  //+ Scatter with respective gated value
+  QVector<QPointF> scatters_gated;
+  std::vector<bool> gated;
+  scatters_gated_struct scatter_struct;
+  scatter_struct.scatters_gated = scatters_gated;
+  scatter_struct.gated = gated;
+  /*
+  QVector<QPointF> scatters_gated;
+  bool *gated;
+  std::pair<QVector<QPointF>, bool *> scatters_gated_pair;
+  scatters_gated_pair.first = scatters_gated;
+  scatters_gated_pair.second = gated;
+  */
 
   // loop over and draw segments of unselected/selected data:
   QList<QCPDataRange> selectedSegments, unselectedSegments, allSegments;
@@ -21549,17 +21563,25 @@ void QCPGraph::draw(QCPPainter *painter)
     }
 
     //! draw scatters:
-    bool *gated_data_array;
-    std::vector<int> *sampled_gated_data_index_array;
-    sampled_gated_data_index_array->reserve(1000000);
-    gated_data_array = mDataContainer->get_gated_data_array();
+    // bool *gated_data_array;
+    // std::vector<int> *sampled_gated_data_index_array;
+    // sampled_gated_data_index_array->reserve(1000000);
+    // gated_data_array = mDataContainer->get_gated_data_array();
     QCPScatterStyle finalScatterStyle = mScatterStyle;
     if (isSelectedSegment && mSelectionDecorator)
       finalScatterStyle = mSelectionDecorator->getFinalScatterStyle(mScatterStyle);
     if (!finalScatterStyle.isNone())
     {
-      getScatters(&scatters, gated_data_array, sampled_gated_data_index_array, allSegments.at(i));
-      drawScatterPlot(painter, gated_data_array, scatters, finalScatterStyle);
+      // getScatters(&scatters, gated_data_array, sampled_gated_data_index_array, allSegments.at(i));
+      getScatters(&scatter_struct, allSegments.at(i));
+      // drawScatterPlot(painter, scatters, finalScatterStyle);
+      /*
+      for (size_t i = 0; i < 100; i++)
+      {
+        qDebug() << scatter_struct.gated[i];
+      }
+      */
+      drawScatterPlot(painter, scatter_struct, finalScatterStyle);
     }
   }
 
@@ -21730,16 +21752,18 @@ void QCPGraph::getScatters(QVector<QPointF> *scatters, const QCPDataRange &dataR
   }
 }
 
-void QCPGraph::getScatters(QVector<QPointF> *scatters, bool *gated_data_array, std::vector<int> *sampled_gated_data_index_array, const QCPDataRange &dataRange) const
+void QCPGraph::getScatters(scatters_gated_struct *scatter_struct, const QCPDataRange &dataRange) const
 {
-  if (!scatters)
+  // qDebug() << &(scatter_struct->scatters_gated) << " " << scatter_struct->gated;
+
+  if (!&(scatter_struct->scatters_gated))
     return;
   QCPAxis *keyAxis = mKeyAxis.data();
   QCPAxis *valueAxis = mValueAxis.data();
   if (!keyAxis || !valueAxis)
   {
     qDebug() << Q_FUNC_INFO << "invalid key or value axis";
-    scatters->clear();
+    //&(scatter_struct->scatters_gated)->clear();
     return;
   }
 
@@ -21747,25 +21771,29 @@ void QCPGraph::getScatters(QVector<QPointF> *scatters, bool *gated_data_array, s
   getVisibleDataBounds(begin, end, dataRange);
   if (begin == end)
   {
-    scatters->clear();
+    //&(scatter_struct->scatters_gated)->clear();
     return;
   }
   QVector<QCPGraphData> data;
-  getOptimizedScatterData(&data, begin, end, gated_data_array, sampled_gated_data_index_array);
+  getOptimizedScatterData(&data, begin, end);
 
   if (mKeyAxis->rangeReversed() != (mKeyAxis->orientation() == Qt::Vertical)) // make sure key pixels are sorted ascending in data (significantly simplifies following processing)
     std::reverse(data.begin(), data.end());
 
-  scatters->resize(data.size());
+  scatter_struct->scatters_gated.resize(data.size());
+  scatter_struct->gated.resize(data.size());
+
   if (keyAxis->orientation() == Qt::Vertical)
   {
     for (int i = 0; i < data.size(); ++i)
     {
       if (!qIsNaN(data.at(i).value))
       {
-        (*scatters)[i].setX(valueAxis->coordToPixel(data.at(i).value));
-        (*scatters)[i].setY(keyAxis->coordToPixel(data.at(i).key));
+        (scatter_struct->scatters_gated)[i].setX(valueAxis->coordToPixel(data.at(i).value));
+        (scatter_struct->scatters_gated)[i].setY(keyAxis->coordToPixel(data.at(i).key));
+        (scatter_struct->gated)[i] = data.at(i).gated;
       }
+      // qDebug() << (scatter_struct->scatters_gated)[i].x() << (scatter_struct->scatters_gated)[i].y();
     }
   }
   else
@@ -21774,10 +21802,12 @@ void QCPGraph::getScatters(QVector<QPointF> *scatters, bool *gated_data_array, s
     {
       if (!qIsNaN(data.at(i).value))
       {
-        (*scatters)[i].setX(keyAxis->coordToPixel(data.at(i).key));
-        (*scatters)[i].setY(valueAxis->coordToPixel(data.at(i).value));
+        (scatter_struct->scatters_gated)[i].setX(keyAxis->coordToPixel(data.at(i).key));
+        (scatter_struct->scatters_gated)[i].setY(valueAxis->coordToPixel(data.at(i).value));
+        (scatter_struct->gated)[i] = data.at(i).gated;
       }
-      // qDebug() << data.at(i).key << ", " << data.at(i).value;
+      // qDebug() << data.at(i).key << ", " << data.at(i).gated;
+      // qDebug() << (scatter_struct->scatters_gated)[i].x() << (scatter_struct->scatters_gated)[i].y();
     }
   }
 }
@@ -22124,38 +22154,23 @@ void QCPGraph::drawScatterPlot(QCPPainter *painter, const QVector<QPointF> &scat
   }
 }
 
-void QCPGraph::drawScatterPlot(QCPPainter *painter, bool *gated_data_array, const QVector<QPointF> &scatters, const QCPScatterStyle &style) const
+void QCPGraph::drawScatterPlot(QCPPainter *painter, scatters_gated_struct scatter_struct, const QCPScatterStyle &style) const
 {
   QPen drawPen;
   drawPen.setColor(Qt::red);
   drawPen.setWidth(1);
   applyScattersAntialiasingHint(painter);
   style.applyTo(painter, drawPen);
-  int count = 0;
-  /*
-  for (size_t i = 5000; i < 10000; i++)
-  {
-    gated_data_array[i] = true;
-  }
-  */
+  QVector<QPointF> scatters;
+  scatters = scatter_struct.scatters_gated;
 
-  int it = 0;
-  foreach (const QPointF &scatter, scatters)
+  int count = 0;
+  foreach (const QPointF &scatter, scatter_struct.scatters_gated)
   {
-    if (*(gated_data_array + it) == true)
-    {
-      drawPen.setColor(Qt::green);
-      style.applyTo(painter, drawPen);
-    }
-    else
-    {
-      drawPen.setColor(Qt::red);
-      style.applyTo(painter, drawPen);
-    }
-    // qDebug() << *(gated_data_array + count);
-    //  qDebug() << scatter.x() << ", " << scatter.y();
+    count++;
     /*
-    if (scatter.x() < 400 && scatter.y() < 400)
+    // qDebug() << scatter.x() << ", " << scatter.y();
+    if (scatter.scatters_gated.x() < 400 && scatter.scatters_gated.y() < 400)
     {
       drawPen.setColor(Qt::green);
       style.applyTo(painter, drawPen);
@@ -22165,9 +22180,25 @@ void QCPGraph::drawScatterPlot(QCPPainter *painter, bool *gated_data_array, cons
       drawPen.setColor(Qt::red);
       style.applyTo(painter, drawPen);
     }
+    style.drawShape(painter, scatter.scatters_gated.x(), scatter.scatters_gated.y());
     */
-    style.drawShape(painter, scatter.x(), scatter.y());
-    it++;
+  }
+  // qDebug() << scatter_struct.scatters_gated[0].x();
+
+  for (int i = 0; i < count; i++)
+  {
+    //* Gated
+    if (scatter_struct.gated[i] == true)
+    {
+      drawPen.setColor(Qt::green);
+      style.applyTo(painter, drawPen);
+    }
+    else //* Not gated
+    {
+      drawPen.setColor(Qt::red);
+      style.applyTo(painter, drawPen);
+    }
+    style.drawShape(painter, scatter_struct.scatters_gated[i].x(), scatter_struct.scatters_gated[i].y());
   }
 }
 
@@ -22506,6 +22537,21 @@ void QCPGraph::getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGr
 
 void QCPGraph::getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGraphDataContainer::const_iterator begin, QCPGraphDataContainer::const_iterator end, bool *gated_data_array, std::vector<int> *sampled_gated_data_index_array) const
 {
+
+  /*
+  QCPGraphDataContainer::const_iterator test = begin;
+  int sum = 0;
+  while (test != end)
+  {
+    qDebug() << test->key << " " << test->value;
+    test++;
+    sum++;
+  }
+  qDebug() << "SUM : " << sum;
+  */
+
+  qDebug() << "begin : " << begin->key << " " << begin->value;
+  qDebug() << "end : " << end->key << " " << end->value;
   if (!scatterData)
     return;
   QCPAxis *keyAxis = mKeyAxis.data();
@@ -22519,7 +22565,9 @@ void QCPGraph::getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGr
   const int scatterModulo = mScatterSkip + 1;
   const bool doScatterSkip = mScatterSkip > 0;
   int beginIndex = int(begin - mDataContainer->constBegin());
+  qDebug() << "beginIndex : " << beginIndex << " indice du premier points affiché";
   int endIndex = int(end - mDataContainer->constBegin());
+  qDebug() << "endIndex : " << endIndex << " indice du dernier point affiché";
   while (doScatterSkip && begin != end && beginIndex % scatterModulo != 0) // advance begin iterator to first non-skipped scatter
   {
     ++beginIndex;
@@ -22528,23 +22576,26 @@ void QCPGraph::getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGr
   if (begin == end)
     return;
   int dataCount = int(end - begin);
-  qDebug() << dataCount;
+  qDebug() << "dataCount : " << dataCount << " nombre de points affichés";
   int maxCount = (std::numeric_limits<int>::max)();
   if (mAdaptiveSampling)
   {
     int keyPixelSpan = int(qAbs(keyAxis->coordToPixel(begin->key) - keyAxis->coordToPixel((end - 1)->key)));
     maxCount = 2 * keyPixelSpan + 2;
+    qDebug() << "keyPixelSpan : " << keyPixelSpan << " pixels horizontaux du plot";
   }
-
+  qDebug() << "maxCount : " << maxCount;
   if (mAdaptiveSampling && dataCount >= maxCount) // use adaptive sampling only if there are at least two points per pixel on average
   {
-    int index = begin->key;
+    int index = beginIndex;
     double valueMaxRange = valueAxis->range().upper;
     double valueMinRange = valueAxis->range().lower;
+    qDebug() << "values min and max range : " << valueMinRange << " " << valueMaxRange << " verticalement";
     QCPGraphDataContainer::const_iterator it = begin;
     int itIndex = int(beginIndex);
     double minValue = it->value;
     double maxValue = it->value;
+    qDebug() << "values min and max : " << minValue << " " << maxValue;
     QCPGraphDataContainer::const_iterator minValueIt = it;
     QCPGraphDataContainer::const_iterator maxValueIt = it;
     QCPGraphDataContainer::const_iterator currentIntervalStart = it;
@@ -22592,6 +22643,7 @@ void QCPGraph::getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGr
           // determine value pixel span and add as many points in interval to maintain certain vertical data density (this is specific to scatter plot):
           double valuePixelSpan = qAbs(valueAxis->coordToPixel(minValue) - valueAxis->coordToPixel(maxValue));
           int dataModulo = qMax(1, qRound(intervalDataCount / (valuePixelSpan / 4.0))); // approximately every 4 value pixels one data point on average
+          // qDebug() << "valuePixelSpan : " << valuePixelSpan << ", dataModulo : " << dataModulo;
           QCPGraphDataContainer::const_iterator intervalIt = currentIntervalStart;
           int c = 0;
           while (intervalIt != it)
@@ -22599,6 +22651,7 @@ void QCPGraph::getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGr
             if ((c % dataModulo == 0 || intervalIt == minValueIt || intervalIt == maxValueIt) && intervalIt->value > valueMinRange && intervalIt->value < valueMaxRange)
             {
               scatterData->append(*intervalIt);
+              // qDebug() << intervalIt->key << " " << intervalIt->value;
             }
             ++c;
             if (!doScatterSkip)
@@ -22623,7 +22676,6 @@ void QCPGraph::getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGr
       if (!doScatterSkip)
       {
         ++it;
-        index++;
       }
       else
       {
@@ -22636,8 +22688,6 @@ void QCPGraph::getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGr
           itIndex = endIndex;
         }
       }
-      qDebug() << index;
-      //qDebug() << begin->key;
     }
     // handle last interval:
     if (intervalDataCount >= 2) // last pixel had multiple data points, consolidate them
