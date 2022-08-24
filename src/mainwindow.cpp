@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setupSpacer();
     user_is_drawing = false;
     draw_ellipse = false;
+    draw_line = false;
     adaptative_sampling_on_idle = false;
     mouse_wheel_is_turning = false;
     // Populate for adaptivesampling
@@ -277,7 +278,7 @@ void MainWindow::mousePressed(QMouseEvent *e)
     }
 }
 
-void MainWindow::plotMouseClick(QMouseEvent *e)
+void MainWindow::plotMouseClickEllipse(QMouseEvent *e)
 {
     if (draw_ellipse)
     {
@@ -303,7 +304,64 @@ void MainWindow::plotMouseClick(QMouseEvent *e)
     draw_ellipse = !draw_ellipse;
 }
 
-void MainWindow::plotMouseMove(QMouseEvent *e)
+void MainWindow::plotMouseClickLine(QMouseEvent *e)
+{
+    if (draw_line)
+    {
+        //* Vérifier si on ferme le polygone
+        int x = customPlot->xAxis->pixelToCoord(e->pos().x());
+        int y = customPlot->yAxis->pixelToCoord(e->pos().y());
+        int epsilon = 10;
+        for (QCPItemLine *line : m_selectionLine)
+        {
+            //+ Calcul de distance euclidienne
+            int x_line = line->start->key();
+            int y_line = line->start->value();
+            if (sqrt(pow(x - x_line, 2) + pow(y - y_line, 2)) < epsilon)
+            {
+                //+ Fermer le polygone
+                m_selectionLine.back()->end->setCoords(x_line, y_line);
+                // draw_line = false;
+                disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickLine(QMouseEvent *)));
+                disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMoveLine(QMouseEvent *)));
+
+                customPlot->setInteraction(QCP::iRangeDrag, true);
+                customPlot->setInteraction(QCP::iRangeZoom, true);
+                return;
+            }
+        }
+
+        QCPItemLine *line = new QCPItemLine(customPlot);
+        line->setVisible(false);
+        line->setPen(QPen(Qt::black));
+        line->setLayer(cursorLayer);
+        m_selectionLine.push_back(line);
+        m_selectionLine.back()->setVisible(true);
+        m_selectionLine.back()->setClipToAxisRect(false);
+
+        m_selectionLine.back()->start->setCoords(x, y);
+        m_selectionLine.back()->end->setCoords(x + 1, y + 1);
+    }
+    else
+    {
+        if (e->button() == Qt::LeftButton)
+        {
+
+            qDebug() << "LeftClick" << e->pos();
+            m_selectionLine.back()->setVisible(true);
+            m_selectionLine.back()->setClipToAxisRect(false);
+            int x = customPlot->xAxis->pixelToCoord(e->pos().x());
+            int y = customPlot->yAxis->pixelToCoord(e->pos().y());
+
+            m_selectionLine.back()->start->setCoords(x, y);
+            m_selectionLine.back()->end->setCoords(x + 1, y + 1);
+            draw_line = true;
+        }
+    }
+    // draw_line = !draw_line;
+}
+
+void MainWindow::plotMouseMoveEllipse(QMouseEvent *e)
 {
     if (draw_ellipse)
     {
@@ -311,6 +369,18 @@ void MainWindow::plotMouseMove(QMouseEvent *e)
         int x = customPlot->xAxis->pixelToCoord(e->pos().x());
         int y = customPlot->yAxis->pixelToCoord(e->pos().y());
         m_selectionCircle->bottomRight->setCoords(x, y);
+        cursorLayer->replot();
+    }
+}
+
+void MainWindow::plotMouseMoveLine(QMouseEvent *e)
+{
+    if (draw_line)
+    {
+        qDebug() << "Mouse moved";
+        int x = customPlot->xAxis->pixelToCoord(e->pos().x());
+        int y = customPlot->yAxis->pixelToCoord(e->pos().y());
+        m_selectionLine.back()->end->setCoords(x, y);
         cursorLayer->replot();
     }
 }
@@ -384,8 +454,8 @@ void MainWindow::on_DrawEllipse_clicked()
         ui->DrawEllipse->setChecked(false);
         delete m_selectionCircle;
 
-        disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClick(QMouseEvent *)));
-        disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMove(QMouseEvent *)));
+        disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickEllipse(QMouseEvent *)));
+        disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMoveEllipse(QMouseEvent *)));
 
         customPlot->setInteraction(QCP::iRangeDrag, true);
         customPlot->setInteraction(QCP::iRangeZoom, true);
@@ -400,8 +470,8 @@ void MainWindow::on_DrawEllipse_clicked()
         m_selectionCircle->setBrush(Qt::NoBrush);
         m_selectionCircle->setLayer(cursorLayer);
 
-        connect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClick(QMouseEvent *)));
-        connect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMove(QMouseEvent *)));
+        connect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickEllipse(QMouseEvent *)));
+        connect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMoveEllipse(QMouseEvent *)));
 
         customPlot->setInteraction(QCP::iRangeDrag, false);
         customPlot->setInteraction(QCP::iRangeZoom, false);
@@ -420,8 +490,8 @@ void MainWindow::on_validateDrawing_clicked()
     {
         ui->DrawEllipse->setChecked(false);
 
-        disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClick(QMouseEvent *)));
-        disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMove(QMouseEvent *)));
+        disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickEllipse(QMouseEvent *)));
+        disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMoveEllipse(QMouseEvent *)));
 
         customPlot->setInteraction(QCP::iRangeDrag, true);
         customPlot->setInteraction(QCP::iRangeZoom, true);
@@ -465,4 +535,36 @@ void MainWindow::gating(QCPItemPosition *x1y1, QCPItemPosition *x2y2)
         }
     }
     replot();
+}
+
+void MainWindow::on_DrawPolygon_clicked()
+{
+    if (user_is_drawing)
+    {
+        ui->DrawPolygon->setChecked(false);
+        m_selectionLine.clear();
+
+        disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickLine(QMouseEvent *)));
+        disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseClickLine(QMouseEvent *)));
+
+        customPlot->setInteraction(QCP::iRangeDrag, true);
+        customPlot->setInteraction(QCP::iRangeZoom, true);
+    }
+    else
+    {
+        ui->DrawPolygon->setChecked(true);
+        QCPItemLine *line = new QCPItemLine(customPlot);
+        line->setVisible(false);
+        line->setPen(QPen(Qt::black));
+        line->setLayer(cursorLayer);
+        m_selectionLine.push_back(line);
+
+        connect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickLine(QMouseEvent *)));
+        connect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMoveLine(QMouseEvent *)));
+
+        customPlot->setInteraction(QCP::iRangeDrag, false);
+        customPlot->setInteraction(QCP::iRangeZoom, false);
+    }
+    // Switch status of user_is_drawing
+    // user_is_drawing = !user_is_drawing;
 }

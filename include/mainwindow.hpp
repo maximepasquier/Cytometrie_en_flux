@@ -76,10 +76,12 @@ public:
 
 public slots:
     void makePlot(int marqueur_number_1, int marqueur_number_2);
-    void plotMouseClick(QMouseEvent *e);
+    void plotMouseClickEllipse(QMouseEvent *e);
+    void plotMouseClickLine(QMouseEvent *e);
     void mousePressed(QMouseEvent *e);
     void mouseReleased(QMouseEvent *e);
-    void plotMouseMove(QMouseEvent *e);
+    void plotMouseMoveEllipse(QMouseEvent *e);
+    void plotMouseMoveLine(QMouseEvent *e);
     void wheelMoved(QWheelEvent *);
     void wheelStopped();
 
@@ -90,14 +92,16 @@ private slots:
     void on_setAdaptativeSampling_stateChanged(int arg1);
     void on_setOpenGL_stateChanged(int arg1);
     void on_DrawEllipse_clicked();
+    void on_DrawPolygon_clicked();
     void on_validateDrawing_clicked();
     void on_setAdaptativeSampling_activated();
     void connect_adaptive_sampling_on_idle();
     void disconnect_adaptive_sampling_on_idle();
+    
 
 private:
     bool user_is_drawing;
-    bool draw_ellipse;
+    bool draw_ellipse, draw_line;
     bool adaptative_sampling_on_idle;
     bool mouse_wheel_is_turning;
     VectorXd first_column;
@@ -110,6 +114,7 @@ private:
     QCPGraph *curGraph;
     QCustomPlot *customPlot;
     QCPItemEllipse *m_selectionCircle;
+    std::vector<QCPItemLine*> m_selectionLine;
     QCPLayer *cursorLayer;
 };
 #endif // MAINWINDOW_HPP
