@@ -1,6 +1,9 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+#define MIN(x,y) (x < y ? x : y)
+#define MAX(x,y) (x > y ? x : y)
+
 #include <QMainWindow>
 
 //#define QCUSTOMPLOT_USE_OPENGL
@@ -61,6 +64,12 @@ struct Coords
     int x, y;
 };
 
+struct Point
+{
+    int x;
+    int y;
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -72,7 +81,9 @@ public:
     void populate_marqueurs(int nombre_de_marqueurs);
     void connect_signals_to_slots();
     void setupSpacer();
-    void gating(QCPItemPosition *x1y1, QCPItemPosition *x2y2);
+    void gating_ellipse();
+    void gating_polygon();
+    bool InsidePolygon(Point polygon[],int N,Point p);
 
 public slots:
     void makePlot(int marqueur_number_1, int marqueur_number_2);

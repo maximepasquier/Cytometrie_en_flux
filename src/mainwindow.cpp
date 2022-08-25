@@ -466,7 +466,7 @@ void MainWindow::on_DrawEllipse_clicked()
         ui->DrawEllipse->setChecked(true);
         m_selectionCircle = new QCPItemEllipse(customPlot);
         m_selectionCircle->setVisible(false);
-        m_selectionCircle->setPen(QPen(Qt::red));
+        m_selectionCircle->setPen(QPen(Qt::black));
         m_selectionCircle->setBrush(Qt::NoBrush);
         m_selectionCircle->setLayer(cursorLayer);
 
@@ -482,33 +482,114 @@ void MainWindow::on_DrawEllipse_clicked()
 }
 void MainWindow::on_validateDrawing_clicked()
 {
-    if (m_selectionCircle == nullptr)
+    if (m_selectionCircle == nullptr && m_selectionLine.size() == 0)
     {
         qDebug() << "No shape drawn !";
     }
     else
     {
-        ui->DrawEllipse->setChecked(false);
+        if (m_selectionCircle != nullptr)
+        {
+            ui->DrawEllipse->setChecked(false);
 
-        disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickEllipse(QMouseEvent *)));
-        disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMoveEllipse(QMouseEvent *)));
+            disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickEllipse(QMouseEvent *)));
+            disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMoveEllipse(QMouseEvent *)));
 
+            // connect_adaptive_sampling_on_idle();
+            qDebug() << "Ellipse gating !";
+            gating_ellipse();
+        }
+        if (m_selectionLine.size() != 0)
+        {
+            ui->DrawPolygon->setChecked(false);
+            disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickLine(QMouseEvent *)));
+            disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMoveLine(QMouseEvent *)));
+
+            qDebug() << "Polygon gating !";
+            gating_polygon();
+        }
         customPlot->setInteraction(QCP::iRangeDrag, true);
         customPlot->setInteraction(QCP::iRangeZoom, true);
-        connect_adaptive_sampling_on_idle();
-        // std::cout << m_selectionCircle->topLeft << std::endl;
-
-        QCPItemPosition *x1y1, *x2y2;
-        x1y1 = m_selectionCircle->topLeft;
-        x2y2 = m_selectionCircle->bottomRight;
-
-        gating(x1y1, x2y2);
     }
 }
 
-void MainWindow::gating(QCPItemPosition *x1y1, QCPItemPosition *x2y2)
+void MainWindow::gating_polygon()
 {
     bool *gated_data_array = dataSet->get_gated_data_array();
+    int x1 = m_selectionLine.back()->start->key();
+    int x2 = m_selectionLine.back()->end->key();
+    int polygon_vertices_number = m_selectionLine.size();
+    Point polygon[polygon_vertices_number];
+    int n = sizeof(polygon) / sizeof(polygon[0]);
+
+    int iter = 0;
+    for (QCPItemLine *line : m_selectionLine)
+    {
+        polygon[iter].x = line->start->key();
+        polygon[iter].y = line->start->value();
+        // qDebug() << polygon[i].x << " " << polygon[i].y;
+        iter++;
+        // qDebug() << line->start->key();
+    }
+
+    for (int i = 0; i < first_column.size(); i++)
+    {
+        Point p;
+        p.x = first_column[i];
+        p.y = second_column[i];
+        // std::cout << p.x << " " << p.y << std::endl;
+        if (InsidePolygon(polygon,polygon_vertices_number,p))
+        {
+            // std::cout << p.x << " " << p.y << std::endl;
+            gated_data_array[i] = true;
+        }
+    }
+    for (size_t i = 0; i < polygon_vertices_number; i++)
+    {
+        std::cout << polygon[i].x << " " << polygon[i].y << std::endl;
+    }
+
+    replot();
+}
+
+//* https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
+bool MainWindow::InsidePolygon(Point polygon[],int N,Point p)
+{
+  int counter = 0;
+  int i;
+  double xinters;
+  Point p1,p2;
+
+  p1 = polygon[0];
+  for (i=1;i<=N;i++) {
+    p2 = polygon[i % N];
+    if (p.y > MIN(p1.y,p2.y)) {
+      if (p.y <= MAX(p1.y,p2.y)) {
+        if (p.x <= MAX(p1.x,p2.x)) {
+          if (p1.y != p2.y) {
+            xinters = (p.y-p1.y)*(p2.x-p1.x)/(p2.y-p1.y)+p1.x;
+            if (p1.x == p2.x || p.x <= xinters)
+              counter++;
+          }
+        }
+      }
+    }
+    p1 = p2;
+  }
+
+  if (counter % 2 == 0)
+    return(false);
+  else
+    return(true);
+}
+
+
+void MainWindow::gating_ellipse()
+{
+    bool *gated_data_array = dataSet->get_gated_data_array();
+    QCPItemPosition *x1y1, *x2y2;
+    x1y1 = m_selectionCircle->topLeft;
+    x2y2 = m_selectionCircle->bottomRight;
     int x1 = x1y1->key();
     int y1 = x1y1->value();
     int x2 = x2y2->key();
@@ -523,12 +604,6 @@ void MainWindow::gating(QCPItemPosition *x1y1, QCPItemPosition *x2y2)
     qDebug() << x1 << " " << y1;
     for (size_t i = 0; i < first_column.size(); i++)
     {
-        /*
-        if(first_column[i] > 100 && first_column[i] < 200 && second_column[i] > 100 & second_column[i] < 200)
-        {
-            gated_data_array[i] = true;
-        }
-        */
         if (pow((first_column[i] - center.x), 2) / pow(rayon_horizontal, 2) + pow((second_column[i] - center.y), 2) / pow(rayon_vertical, 2) < 1)
         {
             gated_data_array[i] = true;
@@ -542,6 +617,10 @@ void MainWindow::on_DrawPolygon_clicked()
     if (user_is_drawing)
     {
         ui->DrawPolygon->setChecked(false);
+        for (QCPItemLine *line : m_selectionLine)
+        {
+            delete line;
+        }
         m_selectionLine.clear();
 
         disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickLine(QMouseEvent *)));
@@ -566,5 +645,6 @@ void MainWindow::on_DrawPolygon_clicked()
         customPlot->setInteraction(QCP::iRangeZoom, false);
     }
     // Switch status of user_is_drawing
-    // user_is_drawing = !user_is_drawing;
+    user_is_drawing = !user_is_drawing;
+    customPlot->replot();
 }
