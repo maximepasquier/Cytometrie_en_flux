@@ -41,13 +41,6 @@ void DataStruct::init_gated_data_array()
     gated_data_array = new bool[number_of_lines];
     for (size_t i = 0; i < number_of_lines; i++)
     {
-        // All data not gated yet
         gated_data_array[i] = false;
     }
-    /*
-    for (size_t i = 100000; i < 600000; i++)
-    {
-        gated_data_array[i] = true;
-    }
-    */
 }

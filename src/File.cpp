@@ -19,7 +19,7 @@ void File::read_file_size()
 {
     std::fstream file;
     file.open(file_path, std::ios::in);
-    std::cout << "file open ? : " << file.is_open() << std::endl;
+    // std::cout << "file open ? : " << file.is_open() << std::endl;
     std::string line, word, temp;
     int nombre_de_lignes = 0;
     int nombre_de_colonnes = 0;
@@ -52,10 +52,12 @@ void File::read_marqueurs()
     {
         marqueurs[iterator++] = word;
     }
+    /*
     for (int i = 0; i < number_of_columns; i++)
     {
         std::cout << marqueurs[i] << ", i = " << i << std::endl;
     }
+    */
     file.close();
 }
 

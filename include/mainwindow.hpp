@@ -1,8 +1,8 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
-#define MIN(x,y) (x < y ? x : y)
-#define MAX(x,y) (x > y ? x : y)
+#define MIN(x, y) (x < y ? x : y)
+#define MAX(x, y) (x > y ? x : y)
 
 #include <QMainWindow>
 
@@ -77,16 +77,20 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent);
     ~MainWindow();
+    void setup_mainwindow(std::string window_name, MainWindow *window);
+    void setup_variables();
+    void setup_GUI();
+    void setup_graph_spacer();
+    void setup_buttons_connections();
     void theme();
     void populate_marqueurs(int nombre_de_marqueurs);
-    void connect_signals_to_slots();
-    void setupSpacer();
     void gating_ellipse();
     void gating_polygon();
-    bool InsidePolygon(Point polygon[],int N,Point p);
+    bool InsidePolygon(Point polygon[], int N, Point p);
 
 public slots:
-    void makePlot(int marqueur_number_1, int marqueur_number_2);
+    void makePlot();
+    void refreshPlot(int marqueur_number_1, int marqueur_number_2);
     void plotMouseClickEllipse(QMouseEvent *e);
     void plotMouseClickLine(QMouseEvent *e);
     void mousePressed(QMouseEvent *e);
@@ -98,17 +102,15 @@ public slots:
 
 private slots:
     void updateTheme();
-    void replot();
+    void replot_graph();
     void on_actionOpen_triggered();
-    void on_setAdaptativeSampling_stateChanged(int arg1);
     void on_setOpenGL_stateChanged(int arg1);
     void on_DrawEllipse_clicked();
     void on_DrawPolygon_clicked();
     void on_validateDrawing_clicked();
-    void on_setAdaptativeSampling_activated();
+    void setAdaptativeSampling();
     void connect_adaptive_sampling_on_idle();
     void disconnect_adaptive_sampling_on_idle();
-    
 
 private:
     bool user_is_drawing;
@@ -125,7 +127,7 @@ private:
     QCPGraph *curGraph;
     QCustomPlot *customPlot;
     QCPItemEllipse *m_selectionCircle;
-    std::vector<QCPItemLine*> m_selectionLine;
+    std::vector<QCPItemLine *> m_selectionLine;
     QCPLayer *cursorLayer;
 };
 #endif // MAINWINDOW_HPP

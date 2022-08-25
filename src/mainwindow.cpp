@@ -3,23 +3,43 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
-    this->setWindowTitle("Cytométrie en flux");
+    setup_mainwindow("Cytométrie en flux", this);
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::setup_mainwindow(std::string window_name, MainWindow *window)
+{
+    ui->setupUi(window);
+    window->setWindowTitle("Cytométrie en flux");
     theme();
-    connect_signals_to_slots();
-    setupSpacer();
+    setup_graph_spacer();
+    setup_variables();
+    setup_GUI();
+    setup_buttons_connections();
+}
+
+void MainWindow::setup_variables()
+{
     user_is_drawing = false;
     draw_ellipse = false;
     draw_line = false;
     adaptative_sampling_on_idle = false;
     mouse_wheel_is_turning = false;
+}
+
+void MainWindow::setup_GUI()
+{
     // Populate for adaptivesampling
     ui->setAdaptativeSampling->addItem("ON", 0);
     ui->setAdaptativeSampling->addItem("OFF", 1);
     ui->setAdaptativeSampling->addItem("IDLE", 2);
 }
 
-void MainWindow::setupSpacer()
+void MainWindow::setup_graph_spacer()
 {
     spacer = new QSpacerItem(0, 20, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding);
     ui->verticalLayout->insertSpacerItem(0, spacer);
@@ -34,18 +54,19 @@ void MainWindow::populate_marqueurs(int nombre_de_marqueurs)
     }
 }
 
-void MainWindow::connect_signals_to_slots()
+void MainWindow::setup_buttons_connections()
 {
-    QObject::connect(ui->comboBoxMarqueur1, SIGNAL(activated(int)), this, SLOT(replot()));
-    QObject::connect(ui->comboBoxMarqueur2, SIGNAL(activated(int)), this, SLOT(replot()));
+    QObject::connect(ui->comboBoxMarqueur1, SIGNAL(activated(int)), this, SLOT(replot_graph()));
+    QObject::connect(ui->comboBoxMarqueur2, SIGNAL(activated(int)), this, SLOT(replot_graph()));
+    QObject::connect(ui->setAdaptativeSampling, SIGNAL(activated(int)), this, SLOT(setAdaptativeSampling()));
     QObject::connect(ui->themeComboBox, SIGNAL(activated(int)), this, SLOT(updateTheme()));
 }
 
-void MainWindow::replot()
+void MainWindow::replot_graph()
 {
     int marqueur_number_1 = ui->comboBoxMarqueur1->itemData(ui->comboBoxMarqueur1->currentIndex()).toInt();
     int marqueur_number_2 = ui->comboBoxMarqueur2->itemData(ui->comboBoxMarqueur2->currentIndex()).toInt();
-    makePlot(marqueur_number_1, marqueur_number_2);
+    refreshPlot(marqueur_number_1, marqueur_number_2);
 }
 
 void MainWindow::updateTheme()
@@ -117,16 +138,34 @@ void MainWindow::theme()
     qApp->setPalette(pal);
 }
 
-MainWindow::~MainWindow()
+void MainWindow::refreshPlot(int marqueur_number_1, int marqueur_number_2)
 {
-    delete ui;
+    //* Select columns
+    int first_column_number = marqueur_number_1;
+    int second_column_number = marqueur_number_2;
+    first_column = m_visualisation->col(first_column_number);
+    second_column = m_visualisation->col(second_column_number);
+
+    //* Convert VectorXd to std::vector to Qvector...
+    std::vector<double> first_column_std_vector(first_column.data(), first_column.data() + first_column.rows() * first_column.cols());
+    std::vector<double> second_column_std_vector(second_column.data(), second_column.data() + second_column.rows() * second_column.cols());
+    QVector<double> first_column_QVector = QVector<double>::fromStdVector(first_column_std_vector);
+    QVector<double> second_column_QVector = QVector<double>::fromStdVector(second_column_std_vector);
+
+    customPlot->graph(0)->setData(first_column_QVector, second_column_QVector, dataSet->get_gated_data_array());
+    customPlot->replot();
 }
 
-void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
+void MainWindow::makePlot()
 {
+    //* Remove spacer
     ui->verticalLayout->removeItem(spacer);
-    std::cout << "makePlot !" << std::endl;
-    std::cout << "marqueur_number1 number is : " << marqueur_number_1 << ", marqueur_number2 number is : " << marqueur_number_2 << std::endl;
+    // std::cout << "makePlot !" << std::endl;
+    // std::cout << "marqueur_number1 number is : " << marqueur_number_1 << ", marqueur_number2 number is : " << marqueur_number_2 << std::endl;
+
+    //* Get marqueurs
+    int marqueur_number_1 = ui->comboBoxMarqueur1->itemData(ui->comboBoxMarqueur1->currentIndex()).toInt();
+    int marqueur_number_2 = ui->comboBoxMarqueur2->itemData(ui->comboBoxMarqueur2->currentIndex()).toInt();
 
     //* Select columns
     int first_column_number = marqueur_number_1;
@@ -137,8 +176,6 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
     //* Convert VectorXd to std::vector to Qvector...
     std::vector<double> first_column_std_vector(first_column.data(), first_column.data() + first_column.rows() * first_column.cols());
     std::vector<double> second_column_std_vector(second_column.data(), second_column.data() + second_column.rows() * second_column.cols());
-    // QVector<double> first_column_QVector = QVector<double>(first_column_std_vector.begin(),first_column_std_vector.end());
-    // QVector<double> second_column_QVector = QVector<double>(second_column_std_vector.begin(),second_column_std_vector.end());
     QVector<double> first_column_QVector = QVector<double>::fromStdVector(first_column_std_vector);
     QVector<double> second_column_QVector = QVector<double>::fromStdVector(second_column_std_vector);
 
@@ -161,16 +198,6 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
     ui->verticalLayout->insertWidget(0, customPlot);
 
     curGraph->setPen(drawPen);
-    /*
-    QLinearGradient lGrad(QPointF(0, 0), QPointF(0, 500));
-    lGrad.setColorAt(0, QColor(Qt::red));
-    lGrad.setColorAt(1, QColor(Qt::green));
-    QBrush lBrush(lGrad);
-    QPen myPen;
-    myPen.setBrush(lBrush);
-    curGraph->setPen(myPen);
-    */
-    curGraph->setPen(drawPen);
     curGraph->setLineStyle(QCPGraph::lsNone);
     //! Performances du scatterStyle ?
     curGraph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 1));
@@ -189,18 +216,18 @@ void MainWindow::makePlot(int marqueur_number_1, int marqueur_number_2)
     customPlot->xAxis->setRange(first_column_minValues, first_column_maxValues);
     customPlot->yAxis->setRange(second_column_minValues, second_column_maxValues);
 
-    std::cout << "Replot time is : " << customPlot->replotTime() << std::endl;
+    // std::cout << "Replot time is : " << customPlot->replotTime() << std::endl;
     customPlot->replot();
 }
 
 void MainWindow::on_actionOpen_triggered()
 {
-    qDebug() << "actionOpen_triggered !";
+    // qDebug() << "actionOpen_triggered !";
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     tr("Open File"),
                                                     "/home",
                                                     tr("CSV files (*.csv)"));
-    std::cout << "Path to csv file is : " << fileName.toStdString() << std::endl;
+    // std::cout << "Path to csv file is : " << fileName.toStdString() << std::endl;
 
     File csv_file(fileName.toStdString());
     dataSet = new DataStruct(csv_file);
@@ -213,12 +240,11 @@ void MainWindow::on_actionOpen_triggered()
     curGraph = customPlot->addGraph();
 
     //* Layer
-    // cursorLayer = new QCPLayer(customPlot, "cursorLayer");
     customPlot->addLayer("cursorLayer", 0, QCustomPlot::limAbove);
     cursorLayer = customPlot->layer("cursorLayer");
     cursorLayer->setMode(QCPLayer::lmBuffered);
 
-    replot();
+    makePlot();
 
     // connect_adaptive_sampling_on_idle();
 }
@@ -241,7 +267,7 @@ void MainWindow::disconnect_adaptive_sampling_on_idle()
 
 void MainWindow::wheelMoved(QWheelEvent *)
 {
-    qDebug() << "Wheel moved !";
+    // qDebug() << "Wheel moved !";
     if (!mouse_wheel_is_turning)
     {
         QTimer::singleShot(2000, this, SLOT(wheelStopped()));
@@ -252,7 +278,7 @@ void MainWindow::wheelMoved(QWheelEvent *)
 
 void MainWindow::wheelStopped()
 {
-    qDebug() << "Wheel stopped !";
+    // qDebug() << "Wheel stopped !";
     mouse_wheel_is_turning = false;
     customPlot->graph(0)->setAdaptiveSampling(false);
     customPlot->replot();
@@ -260,7 +286,7 @@ void MainWindow::wheelStopped()
 
 void MainWindow::mouseReleased(QMouseEvent *e)
 {
-    qDebug() << "mouseRelease !";
+    // qDebug() << "mouseRelease !";
     if (adaptative_sampling_on_idle)
     {
         customPlot->graph(0)->setAdaptiveSampling(false);
@@ -270,7 +296,7 @@ void MainWindow::mouseReleased(QMouseEvent *e)
 
 void MainWindow::mousePressed(QMouseEvent *e)
 {
-    qDebug() << "mousePressed !";
+    // qDebug() << "mousePressed !";
     if (adaptative_sampling_on_idle)
     {
         customPlot->graph(0)->setAdaptiveSampling(true);
@@ -280,18 +306,11 @@ void MainWindow::mousePressed(QMouseEvent *e)
 
 void MainWindow::plotMouseClickEllipse(QMouseEvent *e)
 {
-    if (draw_ellipse)
+    if (!draw_ellipse)
     {
         if (e->button() == Qt::LeftButton)
         {
-            qDebug() << "fix LeftClick" << e->pos();
-        }
-    }
-    else
-    {
-        if (e->button() == Qt::LeftButton)
-        {
-            qDebug() << "LeftClick" << e->pos();
+            // qDebug() << "LeftClick" << e->pos();
             m_selectionCircle->setVisible(true);
             m_selectionCircle->setClipToAxisRect(false);
             int x = customPlot->xAxis->pixelToCoord(e->pos().x());
@@ -311,7 +330,7 @@ void MainWindow::plotMouseClickLine(QMouseEvent *e)
         //* Vérifier si on ferme le polygone
         int x = customPlot->xAxis->pixelToCoord(e->pos().x());
         int y = customPlot->yAxis->pixelToCoord(e->pos().y());
-        int epsilon = 10;
+        int epsilon = 20;
         for (QCPItemLine *line : m_selectionLine)
         {
             //+ Calcul de distance euclidienne
@@ -347,7 +366,7 @@ void MainWindow::plotMouseClickLine(QMouseEvent *e)
         if (e->button() == Qt::LeftButton)
         {
 
-            qDebug() << "LeftClick" << e->pos();
+            // qDebug() << "LeftClick" << e->pos();
             m_selectionLine.back()->setVisible(true);
             m_selectionLine.back()->setClipToAxisRect(false);
             int x = customPlot->xAxis->pixelToCoord(e->pos().x());
@@ -365,7 +384,7 @@ void MainWindow::plotMouseMoveEllipse(QMouseEvent *e)
 {
     if (draw_ellipse)
     {
-        qDebug() << "Mouse moved";
+        // qDebug() << "Mouse moved";
         int x = customPlot->xAxis->pixelToCoord(e->pos().x());
         int y = customPlot->yAxis->pixelToCoord(e->pos().y());
         m_selectionCircle->bottomRight->setCoords(x, y);
@@ -377,7 +396,7 @@ void MainWindow::plotMouseMoveLine(QMouseEvent *e)
 {
     if (draw_line)
     {
-        qDebug() << "Mouse moved";
+        // qDebug() << "Mouse moved";
         int x = customPlot->xAxis->pixelToCoord(e->pos().x());
         int y = customPlot->yAxis->pixelToCoord(e->pos().y());
         m_selectionLine.back()->end->setCoords(x, y);
@@ -385,24 +404,7 @@ void MainWindow::plotMouseMoveLine(QMouseEvent *e)
     }
 }
 
-void MainWindow::on_setAdaptativeSampling_stateChanged(int arg1)
-{
-    //! AdaptiveSampling
-    if (arg1 == Qt::Checked)
-    {
-        customPlot->graph(0)->setAdaptiveSampling(true);
-        qDebug() << "Adaptive Sampling on !";
-        replot();
-    }
-    else if (arg1 == Qt::Unchecked)
-    {
-        customPlot->graph(0)->setAdaptiveSampling(false);
-        qDebug() << "Adaptive Sampling off !";
-        replot();
-    }
-}
-
-void MainWindow::on_setAdaptativeSampling_activated()
+void MainWindow::setAdaptativeSampling()
 {
     int index = ui->setAdaptativeSampling->itemData(ui->setAdaptativeSampling->currentIndex()).toInt();
     // qDebug() << index;
@@ -411,21 +413,21 @@ void MainWindow::on_setAdaptativeSampling_activated()
     if (index == 0) // ON
     {
         customPlot->graph(0)->setAdaptiveSampling(true);
-        qDebug() << "Adaptive Sampling on !";
-        replot();
+        // qDebug() << "Adaptive Sampling on !";
+        replot_graph();
     }
     else if (index == 1) // OFF
     {
         customPlot->graph(0)->setAdaptiveSampling(false);
-        qDebug() << "Adaptive Sampling off !";
-        replot();
+        // qDebug() << "Adaptive Sampling off !";
+        replot_graph();
     }
     else if (index == 2) // IDLE
     {
         adaptative_sampling_on_idle = true;
-        qDebug() << "Adaptive Sampling on idle !";
+        // qDebug() << "Adaptive Sampling on idle !";
         connect_adaptive_sampling_on_idle();
-        replot();
+        replot_graph();
     }
 }
 
@@ -435,14 +437,14 @@ void MainWindow::on_setOpenGL_stateChanged(int arg1)
     if (arg1 == Qt::Checked)
     {
         customPlot->setOpenGl(true);
-        qDebug() << "OpenGL on !";
-        replot();
+        // qDebug() << "OpenGL on !";
+        replot_graph();
     }
     else if (arg1 == Qt::Unchecked)
     {
         customPlot->setOpenGl(false);
-        qDebug() << "OpenGL off !";
-        replot();
+        // qDebug() << "OpenGL off !";
+        replot_graph();
     }
 }
 
@@ -538,7 +540,7 @@ void MainWindow::gating_polygon()
         p.x = first_column[i];
         p.y = second_column[i];
         // std::cout << p.x << " " << p.y << std::endl;
-        if (InsidePolygon(polygon,polygon_vertices_number,p))
+        if (InsidePolygon(polygon, polygon_vertices_number, p))
         {
             // std::cout << p.x << " " << p.y << std::endl;
             gated_data_array[i] = true;
@@ -548,41 +550,44 @@ void MainWindow::gating_polygon()
     {
         std::cout << polygon[i].x << " " << polygon[i].y << std::endl;
     }
-
-    replot();
+    replot_graph();
 }
 
 //* https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
-bool MainWindow::InsidePolygon(Point polygon[],int N,Point p)
+bool MainWindow::InsidePolygon(Point polygon[], int N, Point p)
 {
-  int counter = 0;
-  int i;
-  double xinters;
-  Point p1,p2;
+    int counter = 0;
+    int i;
+    double xinters;
+    Point p1, p2;
 
-  p1 = polygon[0];
-  for (i=1;i<=N;i++) {
-    p2 = polygon[i % N];
-    if (p.y > MIN(p1.y,p2.y)) {
-      if (p.y <= MAX(p1.y,p2.y)) {
-        if (p.x <= MAX(p1.x,p2.x)) {
-          if (p1.y != p2.y) {
-            xinters = (p.y-p1.y)*(p2.x-p1.x)/(p2.y-p1.y)+p1.x;
-            if (p1.x == p2.x || p.x <= xinters)
-              counter++;
-          }
+    p1 = polygon[0];
+    for (i = 1; i <= N; i++)
+    {
+        p2 = polygon[i % N];
+        if (p.y > MIN(p1.y, p2.y))
+        {
+            if (p.y <= MAX(p1.y, p2.y))
+            {
+                if (p.x <= MAX(p1.x, p2.x))
+                {
+                    if (p1.y != p2.y)
+                    {
+                        xinters = (p.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
+                        if (p1.x == p2.x || p.x <= xinters)
+                            counter++;
+                    }
+                }
+            }
         }
-      }
+        p1 = p2;
     }
-    p1 = p2;
-  }
 
-  if (counter % 2 == 0)
-    return(false);
-  else
-    return(true);
+    if (counter % 2 == 0)
+        return (false);
+    else
+        return (true);
 }
-
 
 void MainWindow::gating_ellipse()
 {
@@ -609,7 +614,7 @@ void MainWindow::gating_ellipse()
             gated_data_array[i] = true;
         }
     }
-    replot();
+    replot_graph();
 }
 
 void MainWindow::on_DrawPolygon_clicked()
