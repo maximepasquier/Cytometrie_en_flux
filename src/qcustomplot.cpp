@@ -22190,12 +22190,12 @@ void QCPGraph::drawScatterPlot(QCPPainter *painter, scatters_gated_struct scatte
     //* Gated
     if (scatter_struct.gated[i] == true)
     {
-      drawPen.setColor(Qt::green);
+      drawPen.setColor(Qt::red);
       style.applyTo(painter, drawPen);
     }
     else //* Not gated
     {
-      drawPen.setColor(Qt::red);
+      drawPen.setColor(Qt::black);
       style.applyTo(painter, drawPen);
     }
     style.drawShape(painter, scatter_struct.scatters_gated[i].x(), scatter_struct.scatters_gated[i].y());

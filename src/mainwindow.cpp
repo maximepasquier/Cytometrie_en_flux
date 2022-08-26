@@ -152,6 +152,23 @@ void MainWindow::refreshPlot(int marqueur_number_1, int marqueur_number_2)
     QVector<double> first_column_QVector = QVector<double>::fromStdVector(first_column_std_vector);
     QVector<double> second_column_QVector = QVector<double>::fromStdVector(second_column_std_vector);
 
+    //* Rename axis
+    customPlot->xAxis->setLabel(marqueurs[marqueur_number_1].c_str());
+    customPlot->yAxis->setLabel(marqueurs[marqueur_number_2].c_str());
+
+    //* Delete all shapes (ellipse or polygon)
+    if (customPlot->hasItem(m_selectionCircle))
+        customPlot->removeItem(m_selectionCircle);
+    if (!m_selectionLine.empty())
+    {
+        for (QCPItemLine *line : m_selectionLine)
+        {
+            customPlot->removeItem(line);
+        }
+        m_selectionLine.clear();
+    }
+    user_is_drawing = false;
+
     customPlot->graph(0)->setData(first_column_QVector, second_column_QVector, dataSet->get_gated_data_array());
     customPlot->replot();
 }
@@ -331,6 +348,7 @@ void MainWindow::plotMouseClickLine(QMouseEvent *e)
         int x = customPlot->xAxis->pixelToCoord(e->pos().x());
         int y = customPlot->yAxis->pixelToCoord(e->pos().y());
         int epsilon = 20;
+        qDebug() << m_selectionLine.size();
         for (QCPItemLine *line : m_selectionLine)
         {
             //+ Calcul de distance euclidienne
@@ -340,19 +358,20 @@ void MainWindow::plotMouseClickLine(QMouseEvent *e)
             {
                 //+ Fermer le polygone
                 m_selectionLine.back()->end->setCoords(x_line, y_line);
-                // draw_line = false;
                 disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickLine(QMouseEvent *)));
                 disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMoveLine(QMouseEvent *)));
 
                 customPlot->setInteraction(QCP::iRangeDrag, true);
                 customPlot->setInteraction(QCP::iRangeZoom, true);
+
+                draw_line = false;
                 return;
             }
         }
 
         QCPItemLine *line = new QCPItemLine(customPlot);
         line->setVisible(false);
-        line->setPen(QPen(Qt::black));
+        line->setPen(QPen(Qt::red));
         line->setLayer(cursorLayer);
         m_selectionLine.push_back(line);
         m_selectionLine.back()->setVisible(true);
@@ -452,9 +471,10 @@ void MainWindow::on_DrawEllipse_clicked()
 {
     if (user_is_drawing)
     {
-        connect_adaptive_sampling_on_idle();
+        // connect_adaptive_sampling_on_idle();
         ui->DrawEllipse->setChecked(false);
-        delete m_selectionCircle;
+        if (customPlot->hasItem(m_selectionCircle))
+            customPlot->removeItem(m_selectionCircle);
 
         disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickEllipse(QMouseEvent *)));
         disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMoveEllipse(QMouseEvent *)));
@@ -464,11 +484,11 @@ void MainWindow::on_DrawEllipse_clicked()
     }
     else
     {
-        disconnect_adaptive_sampling_on_idle();
+        // disconnect_adaptive_sampling_on_idle();
         ui->DrawEllipse->setChecked(true);
         m_selectionCircle = new QCPItemEllipse(customPlot);
         m_selectionCircle->setVisible(false);
-        m_selectionCircle->setPen(QPen(Qt::black));
+        m_selectionCircle->setPen(QPen(Qt::red));
         m_selectionCircle->setBrush(Qt::NoBrush);
         m_selectionCircle->setLayer(cursorLayer);
 
@@ -484,13 +504,13 @@ void MainWindow::on_DrawEllipse_clicked()
 }
 void MainWindow::on_validateDrawing_clicked()
 {
-    if (m_selectionCircle == nullptr && m_selectionLine.size() == 0)
+    if (!customPlot->hasItem(m_selectionCircle) && m_selectionLine.size() == 0)
     {
         qDebug() << "No shape drawn !";
     }
     else
     {
-        if (m_selectionCircle != nullptr)
+        if (customPlot->hasItem(m_selectionCircle))
         {
             ui->DrawEllipse->setChecked(false);
 
@@ -498,20 +518,21 @@ void MainWindow::on_validateDrawing_clicked()
             disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMoveEllipse(QMouseEvent *)));
 
             // connect_adaptive_sampling_on_idle();
-            qDebug() << "Ellipse gating !";
+            // qDebug() << "Ellipse gating !";
             gating_ellipse();
         }
-        if (m_selectionLine.size() != 0)
+        if (!m_selectionLine.empty())
         {
             ui->DrawPolygon->setChecked(false);
             disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickLine(QMouseEvent *)));
             disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseMoveLine(QMouseEvent *)));
 
-            qDebug() << "Polygon gating !";
+            // qDebug() << "Polygon gating !";
             gating_polygon();
         }
         customPlot->setInteraction(QCP::iRangeDrag, true);
         customPlot->setInteraction(QCP::iRangeZoom, true);
+        user_is_drawing = false;
     }
 }
 
@@ -545,10 +566,6 @@ void MainWindow::gating_polygon()
             // std::cout << p.x << " " << p.y << std::endl;
             gated_data_array[i] = true;
         }
-    }
-    for (size_t i = 0; i < polygon_vertices_number; i++)
-    {
-        std::cout << polygon[i].x << " " << polygon[i].y << std::endl;
     }
     replot_graph();
 }
@@ -606,7 +623,7 @@ void MainWindow::gating_ellipse()
     center.y = int((y1 + y2) / 2);
     rayon_horizontal = int(int(abs(x1 - x2)) / 2);
     rayon_vertical = int(int(abs(y1 - y2)) / 2);
-    qDebug() << x1 << " " << y1;
+    // qDebug() << x1 << " " << y1;
     for (size_t i = 0; i < first_column.size(); i++)
     {
         if (pow((first_column[i] - center.x), 2) / pow(rayon_horizontal, 2) + pow((second_column[i] - center.y), 2) / pow(rayon_vertical, 2) < 1)
@@ -622,11 +639,14 @@ void MainWindow::on_DrawPolygon_clicked()
     if (user_is_drawing)
     {
         ui->DrawPolygon->setChecked(false);
-        for (QCPItemLine *line : m_selectionLine)
+        if (!m_selectionLine.empty())
         {
-            delete line;
+            for (QCPItemLine *line : m_selectionLine)
+            {
+                customPlot->removeItem(line);
+            }
+            m_selectionLine.clear();
         }
-        m_selectionLine.clear();
 
         disconnect(customPlot, SIGNAL(mousePress(QMouseEvent *)), this, SLOT(plotMouseClickLine(QMouseEvent *)));
         disconnect(customPlot, SIGNAL(mouseMove(QMouseEvent *)), this, SLOT(plotMouseClickLine(QMouseEvent *)));
@@ -639,7 +659,7 @@ void MainWindow::on_DrawPolygon_clicked()
         ui->DrawPolygon->setChecked(true);
         QCPItemLine *line = new QCPItemLine(customPlot);
         line->setVisible(false);
-        line->setPen(QPen(Qt::black));
+        line->setPen(QPen(Qt::red));
         line->setLayer(cursorLayer);
         m_selectionLine.push_back(line);
 
