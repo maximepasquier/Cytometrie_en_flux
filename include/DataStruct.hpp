@@ -17,6 +17,7 @@ private:
     bool *gated_data_array;
 
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DataStruct(File file);
     ~DataStruct();
     std::string *get_marqueurs();
