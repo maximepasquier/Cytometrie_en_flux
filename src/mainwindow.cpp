@@ -348,7 +348,7 @@ void MainWindow::plotMouseClickLine(QMouseEvent *e)
         int x = customPlot->xAxis->pixelToCoord(e->pos().x());
         int y = customPlot->yAxis->pixelToCoord(e->pos().y());
         int epsilon = 20;
-        qDebug() << m_selectionLine.size();
+        //qDebug() << m_selectionLine.size();
         for (QCPItemLine *line : m_selectionLine)
         {
             //+ Calcul de distance euclidienne

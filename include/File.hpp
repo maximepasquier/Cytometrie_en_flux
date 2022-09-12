@@ -19,6 +19,7 @@ private:
     MatrixXd *data_matrix;
     char delimiter;
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     File(std::string file_path);
     ~File();
     void read_file_size();
