@@ -25,12 +25,14 @@ set(PROJECT_SOURCES
     include/mainwindow.hpp
     src/qcustomplot.cpp
     include/qcustomplot.h
-    src/Application.cpp
-    include/Application.hpp
     src/DataStruct.cpp
     include/DataStruct.hpp
+    src/VisualData.cpp
+    include/VisualData.hpp
     src/File.cpp
     include/File.hpp
+    src/QPlot.cpp
+    include/QPlot.hpp
     src/mainwindow.ui
 )
 
