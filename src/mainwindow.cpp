@@ -24,6 +24,7 @@ void MainWindow::setup_mainwindow(std::string window_name, MainWindow *window)
 
 void MainWindow::setup_variables()
 {
+    // Init variables
     user_is_drawing = false;
     draw_ellipse = false;
     draw_line = false;
