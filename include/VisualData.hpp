@@ -1,3 +1,6 @@
+#ifndef VISUALDATA_HPP
+#define VISUALDATA_HPP
+
 class VisualData
 {
 private:
@@ -6,3 +9,5 @@ public:
     VisualData(/* args */);
     ~VisualData();
 };
+
+#endif

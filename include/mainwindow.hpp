@@ -2,6 +2,7 @@
 #define MAINWINDOW_HPP
 
 #include <QMainWindow>
+#include "Graph.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -14,8 +15,10 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void setup_mainwindow(std::string window_name, MainWindow *window);
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow *graph_ui;
 };
-#endif // MAINWINDOW_HPP
+
+#endif

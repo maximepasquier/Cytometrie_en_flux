@@ -1,3 +1,6 @@
+#ifndef QPLOT_HPP
+#define QPLOT_HPP
+
 class QPlot
 {
 private:
@@ -6,3 +9,5 @@ public:
     QPlot(/* args */);
     ~QPlot();
 };
+
+#endif

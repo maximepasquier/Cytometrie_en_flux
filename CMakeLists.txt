@@ -29,11 +29,15 @@ set(PROJECT_SOURCES
     include/DataStruct.hpp
     src/VisualData.cpp
     include/VisualData.hpp
+    src/DataReader.cpp
+    include/DataReader.hpp
     src/File.cpp
     include/File.hpp
     src/QPlot.cpp
     include/QPlot.hpp
-    src/mainwindow.ui
+    src/Graph.cpp
+    include/Graph.hpp
+    src/GraphWindow.ui
 )
 
 add_executable(Cytometrie_en_flux
