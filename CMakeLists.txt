@@ -35,8 +35,8 @@ set(PROJECT_SOURCES
     include/File.hpp
     src/QPlot.cpp
     include/QPlot.hpp
-    src/Graph.cpp
-    include/Graph.hpp
+    src/GraphWindow.cpp
+    include/GraphWindow.hpp
     src/GraphWindow.ui
 )
 
