@@ -1,8 +1,10 @@
 #include "GraphWindow.hpp"
 
-GraphWindow::GraphWindow(Ui::MainWindow *graph_ui)
+GraphWindow::GraphWindow()
 {
-    this->graph_ui = graph_ui;
+    graph_window = new Ui::GraphWindow;
+    graph_window->setupUi(this);
+    this->setWindowTitle("Cytométrie en flux");
     setup_graph_spacer();
     setup_GUI();
     setup_variables();
@@ -10,12 +12,13 @@ GraphWindow::GraphWindow(Ui::MainWindow *graph_ui)
 
 GraphWindow::~GraphWindow()
 {
+    delete graph_window;
 }
 
 void GraphWindow::setup_graph_spacer()
 {
     spacer = new QSpacerItem(0, 20, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding);
-    graph_ui->verticalLayout->insertSpacerItem(0, spacer);
+    graph_window->verticalLayout->insertSpacerItem(0, spacer);
 }
 
 void GraphWindow::setup_variables()
@@ -30,15 +33,15 @@ void GraphWindow::setup_variables()
 void GraphWindow::setup_GUI()
 {
     // Populate for adaptivesampling
-    graph_ui->setAdaptativeSampling->addItem("ON", 0);
-    graph_ui->setAdaptativeSampling->addItem("OFF", 1);
-    graph_ui->setAdaptativeSampling->addItem("IDLE", 2);
+    graph_window->setAdaptativeSampling->addItem("ON", 0);
+    graph_window->setAdaptativeSampling->addItem("OFF", 1);
+    graph_window->setAdaptativeSampling->addItem("IDLE", 2);
 }
 
 void GraphWindow::on_actionOpen_triggered()
 {
-    // qDebug() << "actionOpen_triggered !";
-    QString fileName = QFileDialog::getOpenFileName(this,
+    qDebug() << "actionOpen_triggered !";
+    QString fileName = QFileDialog::getOpenFileName(nullptr,
                                                     tr("Open File"),
                                                     "/home",
                                                     tr("CSV files (*.csv)"));
