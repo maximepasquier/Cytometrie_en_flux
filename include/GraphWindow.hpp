@@ -4,7 +4,6 @@
 #include <QWindow>
 #include <QFileDialog>
 #include <QMainWindow>
-//#include <QtCharts>
 #include <QDebug>
 
 #include "../src/ui_GraphWindow.h"
@@ -20,6 +19,8 @@ public:
     void setup_graph_spacer();
     void setup_variables();
     void setup_GUI();
+    void create_data(QString fileName);
+    void create_plot();
     ~GraphWindow();
 
 private:
@@ -30,6 +31,7 @@ private:
     bool adaptative_sampling_on_idle;
     bool mouse_wheel_is_turning;
     QSpacerItem *spacer;
+    DataStruct* data_set;
 
 public slots:
     void on_actionOpen_triggered();

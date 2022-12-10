@@ -45,25 +45,19 @@ void GraphWindow::on_actionOpen_triggered()
                                                     tr("Open File"),
                                                     "/home",
                                                     tr("CSV files (*.csv)"));
-    // std::cout << "Path to csv file is : " << fileName.toStdString() << std::endl;
-    /*
-        File csv_file(fileName.toStdString());
-        dataSet = new DataStruct(csv_file);
 
-        marqueurs = dataSet->get_marqueurs();
-        m_visualisation = dataSet->get_data_matrix();
-        populate_marqueurs(dataSet->get_number_of_columns());
-        customPlot = new QCustomPlot;
-        customPlot->setNoAntialiasingOnDrag(true);
-        curGraph = customPlot->addGraph();
+    create_data(fileName);
+    create_plot();
+}
 
-        //* Layer
-        customPlot->addLayer("cursorLayer", 0, QCustomPlot::limAbove);
-        cursorLayer = customPlot->layer("cursorLayer");
-        cursorLayer->setMode(QCPLayer::lmBuffered);
+void GraphWindow::create_data(QString fileName)
+{
+    char delimiter = ',';
+    File csv_file(fileName.toStdString(),delimiter);
+    data_set = new DataStruct(csv_file);
+}
 
-        makePlot();
-        */
+void GraphWindow::create_plot()
+{
 
-    // connect_adaptive_sampling_on_idle();
 }
