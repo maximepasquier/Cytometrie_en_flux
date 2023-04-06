@@ -18,6 +18,8 @@ public:
     ~DataStruct();
     int get_matrix_columns_number();
     int get_matrix_lines_number();  
+    MatrixXd* get_matrix();
+    std::string* get_marqueurs();
     void set_matrix_columns_number(int nb_columns);
     void set_matrix_lines_number(int nb_lines);
     void set_marqueurs(std::string* data_marqueurs);

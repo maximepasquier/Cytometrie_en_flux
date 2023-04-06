@@ -55,6 +55,7 @@ void DataReader::read_data_matrix(File *csv_file, DataStruct *data_obj)
     }
     // std::cout << *data_matrix << std::endl;
     file.close();
+    data_obj->set_matrix(data_matrix);
 }
 
 void DataReader::read_marqueurs(File *csv_file, DataStruct *data_obj)
@@ -79,4 +80,5 @@ void DataReader::read_marqueurs(File *csv_file, DataStruct *data_obj)
     }
     */
     file.close();
+    data_obj->set_marqueurs(data_marqueurs);
 }

@@ -20,6 +20,16 @@ int DataStruct::get_matrix_columns_number()
     return matrix_columns_number;
 }
 
+MatrixXd *DataStruct::get_matrix()
+{
+    return data_matrix;
+}
+
+std::string* DataStruct::get_marqueurs()
+{
+    return marqueurs;
+}
+
 void DataStruct::set_matrix_lines_number(int nb_lines)
 {
     matrix_lines_number = nb_lines;

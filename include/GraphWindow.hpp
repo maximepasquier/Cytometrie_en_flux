@@ -9,6 +9,7 @@
 #include "../src/ui_GraphWindow.h"
 #include "File.hpp"
 #include "DataStruct.hpp"
+#include "qcustomplot.h"
 
 class GraphWindow : public QMainWindow
 {
