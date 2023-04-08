@@ -26,7 +26,6 @@ void GraphWindow::setup_variables()
     user_is_drawing = false;
     draw_ellipse = false;
     draw_line = false;
-    adaptative_sampling_on_idle = false;
     mouse_wheel_is_turning = false;
 }
 
@@ -35,7 +34,85 @@ void GraphWindow::setup_GUI()
     // Populate for adaptivesampling
     graph_window->setAdaptativeSampling->addItem("ON", 0);
     graph_window->setAdaptativeSampling->addItem("OFF", 1);
-    graph_window->setAdaptativeSampling->addItem("IDLE", 2);
+}
+
+void GraphWindow::populate_marqueurs(int nombre_de_marqueurs)
+{
+    for (int i = 0; i < nombre_de_marqueurs; i++)
+    {
+        graph_window->comboBoxMarqueur1->addItem(data_set->get_marqueurs()[i].c_str(), i);
+        graph_window->comboBoxMarqueur2->addItem(data_set->get_marqueurs()[i].c_str(), i);
+    }
+}
+
+void GraphWindow::setup_buttons_connections()
+{
+    QObject::connect(graph_window->comboBoxMarqueur1, SIGNAL(activated(int)), this, SLOT(replot_graph()));
+    QObject::connect(graph_window->comboBoxMarqueur2, SIGNAL(activated(int)), this, SLOT(replot_graph()));
+    QObject::connect(graph_window->setAdaptativeSampling, SIGNAL(activated(int)), this, SLOT(setAdaptativeSampling()));
+}
+
+void GraphWindow::replot_graph()
+{
+    int marqueur_number_1 = graph_window->comboBoxMarqueur1->itemData(graph_window->comboBoxMarqueur1->currentIndex()).toInt();
+    int marqueur_number_2 = graph_window->comboBoxMarqueur2->itemData(graph_window->comboBoxMarqueur2->currentIndex()).toInt();
+    refresh_plot(marqueur_number_1, marqueur_number_2);
+}
+
+void GraphWindow::refresh_plot(int marqueur_number_1, int marqueur_number_2)
+{
+    //* Select columns
+    int first_column_number = marqueur_number_1;
+    int second_column_number = marqueur_number_2;
+    VectorXd first_column = data_set->get_matrix()->col(first_column_number);
+    VectorXd second_column = data_set->get_matrix()->col(second_column_number);
+
+    //* Convert VectorXd to std::vector to Qvector...
+    std::vector<double> first_column_std_vector(first_column.data(), first_column.data() + first_column.rows() * first_column.cols());
+    std::vector<double> second_column_std_vector(second_column.data(), second_column.data() + second_column.rows() * second_column.cols());
+    QVector<double> first_column_QVector = QVector<double>::fromStdVector(first_column_std_vector);
+    QVector<double> second_column_QVector = QVector<double>::fromStdVector(second_column_std_vector);
+    // QVector<double> first_column_QVector = QVector<double>(first_column_std_vector.begin(), first_column_std_vector.end());
+    // QVector<double> second_column_QVector = QVector<double>(second_column_std_vector.begin(), second_column_std_vector.end());
+
+    //* Rename axis
+    customPlot->xAxis->setLabel(data_set->get_marqueurs()[marqueur_number_1].c_str());
+    customPlot->yAxis->setLabel(data_set->get_marqueurs()[marqueur_number_2].c_str());
+
+    /*
+    //* Delete all shapes (ellipse or polygon)
+    if (customPlot->hasItem(m_selectionCircle))
+        customPlot->removeItem(m_selectionCircle);
+    if (!m_selectionLine.empty())
+    {
+        for (QCPItemLine *line : m_selectionLine)
+        {
+            customPlot->removeItem(line);
+        }
+        m_selectionLine.clear();
+    }
+    user_is_drawing = false;
+    */
+
+    customPlot->graph(0)->setData(first_column_QVector, second_column_QVector);
+    customPlot->replot();
+}
+
+void GraphWindow::on_setOpenGL_stateChanged(int arg1)
+{
+    //! OpenGL
+    if (arg1 == Qt::Checked)
+    {
+        customPlot->setOpenGl(true);
+        qDebug() << "OpenGL on !";
+        replot_graph();
+    }
+    else if (arg1 == Qt::Unchecked)
+    {
+        customPlot->setOpenGl(false);
+        qDebug() << "OpenGL off !";
+        replot_graph();
+    }
 }
 
 void GraphWindow::on_actionOpen_triggered()
@@ -48,6 +125,7 @@ void GraphWindow::on_actionOpen_triggered()
 
     create_data(fileName);
     create_plot();
+    setup_buttons_connections();
 }
 
 void GraphWindow::create_data(QString fileName)
@@ -55,11 +133,13 @@ void GraphWindow::create_data(QString fileName)
     char delimiter = ',';
     File csv_file(fileName.toStdString(), delimiter);
     data_set = new DataStruct(csv_file);
+
+    populate_marqueurs(data_set->get_matrix_columns_number());
 }
 
 void GraphWindow::create_plot()
 {
-    QCustomPlot *customPlot = new QCustomPlot;
+    customPlot = new QCustomPlot;
     customPlot->setNoAntialiasingOnDrag(true);
     QCPGraph *curGraph = customPlot->addGraph();
 
@@ -127,3 +207,20 @@ void GraphWindow::create_plot()
     // std::cout << "Replot time is : " << customPlot->replotTime() << std::endl;
     customPlot->replot();
 }
+
+void GraphWindow::setAdaptativeSampling()
+{
+    int index = graph_window->setAdaptativeSampling->itemData(graph_window->setAdaptativeSampling->currentIndex()).toInt();
+    if (index == 0) // ON
+    {
+        customPlot->graph(0)->setAdaptiveSampling(true);
+        replot_graph();
+    }
+    else if (index == 1) // OFF
+    {
+        customPlot->graph(0)->setAdaptiveSampling(false);
+        replot_graph();
+    }
+}
+
+
