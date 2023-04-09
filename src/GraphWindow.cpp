@@ -2,11 +2,16 @@
 
 GraphWindow::GraphWindow()
 {
+    //* Setup new graph window using GraphWindow.ui
     graph_window = new Ui::GraphWindow;
     graph_window->setupUi(this);
     this->setWindowTitle("Cytométrie en flux");
+
+    //* Setup GUI
     setup_graph_spacer();
     setup_GUI();
+
+    //* Setup variables
     setup_variables();
 }
 
@@ -23,30 +28,31 @@ void GraphWindow::setup_graph_spacer()
 
 void GraphWindow::setup_variables()
 {
-    user_is_drawing = false;
-    draw_ellipse = false;
-    draw_line = false;
-    mouse_wheel_is_turning = false;
+    //user_is_drawing = false;
+    //draw_ellipse = false;
+    //draw_line = false;
 }
 
 void GraphWindow::setup_GUI()
 {
-    // Populate for adaptivesampling
+    //* Populate for adaptivesampling button
     graph_window->setAdaptativeSampling->addItem("ON", 0);
     graph_window->setAdaptativeSampling->addItem("OFF", 1);
 }
 
 void GraphWindow::populate_marqueurs(int nombre_de_marqueurs)
 {
+    //* Populate Marqueurs buttons with all marqueurs
     for (int i = 0; i < nombre_de_marqueurs; i++)
     {
-        graph_window->comboBoxMarqueur1->addItem(data_set->get_marqueurs()[i].c_str(), i);
-        graph_window->comboBoxMarqueur2->addItem(data_set->get_marqueurs()[i].c_str(), i);
+        graph_window->comboBoxMarqueur1->addItem(visual_data_set->get_marqueurs()[i].c_str(), i);
+        graph_window->comboBoxMarqueur2->addItem(visual_data_set->get_marqueurs()[i].c_str(), i);
     }
 }
 
 void GraphWindow::setup_buttons_connections()
 {
+    //* Connect all buttons to slots
     QObject::connect(graph_window->comboBoxMarqueur1, SIGNAL(activated(int)), this, SLOT(replot_graph()));
     QObject::connect(graph_window->comboBoxMarqueur2, SIGNAL(activated(int)), this, SLOT(replot_graph()));
     QObject::connect(graph_window->setAdaptativeSampling, SIGNAL(activated(int)), this, SLOT(setAdaptativeSampling()));
@@ -54,26 +60,27 @@ void GraphWindow::setup_buttons_connections()
 
 void GraphWindow::replot_graph()
 {
+    //* Reselect marqueurs to replot
     int marqueur_number_1 = graph_window->comboBoxMarqueur1->itemData(graph_window->comboBoxMarqueur1->currentIndex()).toInt();
     int marqueur_number_2 = graph_window->comboBoxMarqueur2->itemData(graph_window->comboBoxMarqueur2->currentIndex()).toInt();
+
+    //* Replot with new marqueurs
     refresh_plot(marqueur_number_1, marqueur_number_2);
 }
 
 void GraphWindow::refresh_plot(int marqueur_number_1, int marqueur_number_2)
 {
     //* Select columns
-    int first_column_number = marqueur_number_1;
-    int second_column_number = marqueur_number_2;
-    VectorXd first_column = data_set->get_matrix()->col(first_column_number);
-    VectorXd second_column = data_set->get_matrix()->col(second_column_number);
+    VectorXd first_column = data_set->get_matrix()->col(marqueur_number_1);
+    VectorXd second_column = data_set->get_matrix()->col(marqueur_number_2);
 
     //* Convert VectorXd to std::vector to Qvector...
     std::vector<double> first_column_std_vector(first_column.data(), first_column.data() + first_column.rows() * first_column.cols());
     std::vector<double> second_column_std_vector(second_column.data(), second_column.data() + second_column.rows() * second_column.cols());
-    QVector<double> first_column_QVector = QVector<double>::fromStdVector(first_column_std_vector);
-    QVector<double> second_column_QVector = QVector<double>::fromStdVector(second_column_std_vector);
-    // QVector<double> first_column_QVector = QVector<double>(first_column_std_vector.begin(), first_column_std_vector.end());
-    // QVector<double> second_column_QVector = QVector<double>(second_column_std_vector.begin(), second_column_std_vector.end());
+    // QVector<double> first_column_QVector = QVector<double>::fromStdVector(first_column_std_vector);
+    // QVector<double> second_column_QVector = QVector<double>::fromStdVector(second_column_std_vector);
+    QVector<double> first_column_QVector = QVector<double>(first_column_std_vector.begin(), first_column_std_vector.end());
+    QVector<double> second_column_QVector = QVector<double>(second_column_std_vector.begin(), second_column_std_vector.end());
 
     //* Rename axis
     customPlot->xAxis->setLabel(data_set->get_marqueurs()[marqueur_number_1].c_str());
@@ -94,13 +101,14 @@ void GraphWindow::refresh_plot(int marqueur_number_1, int marqueur_number_2)
     user_is_drawing = false;
     */
 
+    //* Set new data and replot
     customPlot->graph(0)->setData(first_column_QVector, second_column_QVector);
     customPlot->replot();
 }
 
 void GraphWindow::on_setOpenGL_stateChanged(int arg1)
 {
-    //! OpenGL
+    //* OpenGL
     if (arg1 == Qt::Checked)
     {
         customPlot->setOpenGl(true);
@@ -117,12 +125,13 @@ void GraphWindow::on_setOpenGL_stateChanged(int arg1)
 
 void GraphWindow::on_actionOpen_triggered()
 {
-    qDebug() << "actionOpen_triggered !";
+    //* Open file
     QString fileName = QFileDialog::getOpenFileName(nullptr,
                                                     tr("Open File"),
                                                     "/home",
                                                     tr("CSV files (*.csv)"));
 
+    //* Process the file
     create_data(fileName);
     create_plot();
     setup_buttons_connections();
@@ -130,15 +139,24 @@ void GraphWindow::on_actionOpen_triggered()
 
 void GraphWindow::create_data(QString fileName)
 {
+    //* Create data_set
     char delimiter = ',';
     File csv_file(fileName.toStdString(), delimiter);
     data_set = new DataStruct(csv_file);
 
-    populate_marqueurs(data_set->get_matrix_columns_number());
+    //* Create visual_data_set
+    visual_data_set = new VisualData();
+
+    //* Init and format visual_data_set
+    visual_data_set->two_columns_selection(data_set);
+
+    //* Populate marqueurs
+    populate_marqueurs(visual_data_set->get_marqueurs_number());
 }
 
 void GraphWindow::create_plot()
 {
+    //* Create plot
     customPlot = new QCustomPlot;
     customPlot->setNoAntialiasingOnDrag(true);
     QCPGraph *curGraph = customPlot->addGraph();
@@ -156,16 +174,16 @@ void GraphWindow::create_plot()
     int marqueur_number_2 = graph_window->comboBoxMarqueur2->itemData(graph_window->comboBoxMarqueur2->currentIndex()).toInt();
 
     //* Select columns
-    int first_column_number = marqueur_number_1;
-    int second_column_number = marqueur_number_2;
-    VectorXd first_column = data_set->get_matrix()->col(first_column_number);
-    VectorXd second_column = data_set->get_matrix()->col(second_column_number);
+    VectorXd first_column = data_set->get_matrix()->col(marqueur_number_1);
+    VectorXd second_column = data_set->get_matrix()->col(marqueur_number_2);
 
     //* Convert VectorXd to std::vector to Qvector...
     std::vector<double> first_column_std_vector(first_column.data(), first_column.data() + first_column.rows() * first_column.cols());
     std::vector<double> second_column_std_vector(second_column.data(), second_column.data() + second_column.rows() * second_column.cols());
-    QVector<double> first_column_QVector = QVector<double>::fromStdVector(first_column_std_vector);
-    QVector<double> second_column_QVector = QVector<double>::fromStdVector(second_column_std_vector);
+    // QVector<double> first_column_QVector = QVector<double>::fromStdVector(first_column_std_vector);
+    // QVector<double> second_column_QVector = QVector<double>::fromStdVector(second_column_std_vector);
+    QVector<double> first_column_QVector = QVector<double>(first_column_std_vector.begin(), first_column_std_vector.end());
+    QVector<double> second_column_QVector = QVector<double>(second_column_std_vector.begin(), second_column_std_vector.end());
 
     //* Set axis
     double first_column_maxValues = first_column.maxCoeff();
@@ -174,7 +192,7 @@ void GraphWindow::create_plot()
     double second_column_maxValues = second_column.maxCoeff();
     double second_column_minValues = second_column.minCoeff();
 
-    // Set the pen style
+    //* Set the pen style
     QPen drawPen;
     drawPen.setColor(Qt::black);
     drawPen.setWidth(1);
@@ -191,7 +209,7 @@ void GraphWindow::create_plot()
     curGraph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 1));
     curGraph->setData(latVector, lonVector);
 
-    // create graph and assign data to it:
+    //* Create graph and assign data to it:
     customPlot->addGraph();
     customPlot->graph(0)->setData(first_column_QVector, second_column_QVector);
     customPlot->setInteraction(QCP::iRangeDrag, true);
@@ -200,10 +218,12 @@ void GraphWindow::create_plot()
     // give the axes some labels:
     customPlot->xAxis->setLabel(data_set->get_marqueurs()[marqueur_number_1].c_str());
     customPlot->yAxis->setLabel(data_set->get_marqueurs()[marqueur_number_2].c_str());
+
     // set axes ranges, so we see all data:
     customPlot->xAxis->setRange(first_column_minValues, first_column_maxValues);
     customPlot->yAxis->setRange(second_column_minValues, second_column_maxValues);
 
+    //* Plot
     // std::cout << "Replot time is : " << customPlot->replotTime() << std::endl;
     customPlot->replot();
 }
@@ -222,5 +242,3 @@ void GraphWindow::setAdaptativeSampling()
         replot_graph();
     }
 }
-
-
