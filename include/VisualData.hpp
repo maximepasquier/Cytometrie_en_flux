@@ -11,11 +11,12 @@ private:
     MatrixXd* visual_data_matrix;
     int marqueurs_number;
 public:
-    VisualData(/* args */);
+    VisualData(DataStruct* data_set);
     ~VisualData();
     std::string* get_marqueurs();
     int get_marqueurs_number();
-    void two_columns_selection(DataStruct* data_set);
+    void copy_data(DataStruct* data_set);
+    MatrixXd* get_matrix();
 };
 
 #endif

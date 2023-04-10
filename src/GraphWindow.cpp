@@ -71,8 +71,8 @@ void GraphWindow::replot_graph()
 void GraphWindow::refresh_plot(int marqueur_number_1, int marqueur_number_2)
 {
     //* Select columns
-    VectorXd first_column = data_set->get_matrix()->col(marqueur_number_1);
-    VectorXd second_column = data_set->get_matrix()->col(marqueur_number_2);
+    VectorXd first_column = visual_data_set->get_matrix()->col(marqueur_number_1);
+    VectorXd second_column = visual_data_set->get_matrix()->col(marqueur_number_2);
 
     //* Convert VectorXd to std::vector to Qvector...
     std::vector<double> first_column_std_vector(first_column.data(), first_column.data() + first_column.rows() * first_column.cols());
@@ -83,8 +83,8 @@ void GraphWindow::refresh_plot(int marqueur_number_1, int marqueur_number_2)
     QVector<double> second_column_QVector = QVector<double>(second_column_std_vector.begin(), second_column_std_vector.end());
 
     //* Rename axis
-    customPlot->xAxis->setLabel(data_set->get_marqueurs()[marqueur_number_1].c_str());
-    customPlot->yAxis->setLabel(data_set->get_marqueurs()[marqueur_number_2].c_str());
+    customPlot->xAxis->setLabel(visual_data_set->get_marqueurs()[marqueur_number_1].c_str());
+    customPlot->yAxis->setLabel(visual_data_set->get_marqueurs()[marqueur_number_2].c_str());
 
     /*
     //* Delete all shapes (ellipse or polygon)
@@ -145,13 +145,13 @@ void GraphWindow::create_data(QString fileName)
     data_set = new DataStruct(csv_file);
 
     //* Create visual_data_set
-    visual_data_set = new VisualData();
-
-    //* Init and format visual_data_set
-    visual_data_set->two_columns_selection(data_set);
+    visual_data_set = new VisualData(data_set);
 
     //* Populate marqueurs
     populate_marqueurs(visual_data_set->get_marqueurs_number());
+
+    //* Init and format visual_data_set
+    visual_data_set->copy_data(data_set);
 }
 
 void GraphWindow::create_plot()
@@ -174,8 +174,8 @@ void GraphWindow::create_plot()
     int marqueur_number_2 = graph_window->comboBoxMarqueur2->itemData(graph_window->comboBoxMarqueur2->currentIndex()).toInt();
 
     //* Select columns
-    VectorXd first_column = data_set->get_matrix()->col(marqueur_number_1);
-    VectorXd second_column = data_set->get_matrix()->col(marqueur_number_2);
+    VectorXd first_column = visual_data_set->get_matrix()->col(marqueur_number_1);
+    VectorXd second_column = visual_data_set->get_matrix()->col(marqueur_number_2);
 
     //* Convert VectorXd to std::vector to Qvector...
     std::vector<double> first_column_std_vector(first_column.data(), first_column.data() + first_column.rows() * first_column.cols());
@@ -216,8 +216,8 @@ void GraphWindow::create_plot()
     customPlot->setInteraction(QCP::iRangeZoom, true);
 
     // give the axes some labels:
-    customPlot->xAxis->setLabel(data_set->get_marqueurs()[marqueur_number_1].c_str());
-    customPlot->yAxis->setLabel(data_set->get_marqueurs()[marqueur_number_2].c_str());
+    customPlot->xAxis->setLabel(visual_data_set->get_marqueurs()[marqueur_number_1].c_str());
+    customPlot->yAxis->setLabel(visual_data_set->get_marqueurs()[marqueur_number_2].c_str());
 
     // set axes ranges, so we see all data:
     customPlot->xAxis->setRange(first_column_minValues, first_column_maxValues);
