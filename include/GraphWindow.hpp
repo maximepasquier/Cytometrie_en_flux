@@ -11,6 +11,13 @@
 #include "DataStruct.hpp"
 #include "qcustomplot.h"
 #include "VisualData.hpp"
+#include "QPlot.hpp"
+
+struct Point
+{
+    int x;
+    int y;
+};
 
 class GraphWindow : public QMainWindow
 {
@@ -25,6 +32,9 @@ public:
     void create_plot();
     void populate_marqueurs(int nombre_de_marqueurs);
     void setup_buttons_connections();
+    void gating_ellipse();
+    void gating_polygon();
+    bool InsidePolygon(Point polygon[], int N, Point p);
     ~GraphWindow();
 
 public slots:
@@ -33,13 +43,26 @@ public slots:
     void on_setOpenGL_stateChanged(int arg1);
     void refresh_plot(int marqueur_number_1, int marqueur_number_2);
     void setAdaptativeSampling();
+    void plotMouseClickEllipse(QMouseEvent *e);
+    void plotMouseClickLine(QMouseEvent *e);
+    void plotMouseMoveEllipse(QMouseEvent *e);
+    void plotMouseMoveLine(QMouseEvent *e);
+    void on_DrawPolygon_clicked();
+    void on_DrawEllipse_clicked();
+    void on_validateDrawing_clicked();
 
 private:
+    bool user_is_drawing;
+    bool draw_ellipse, draw_line;
+    QCPItemEllipse *m_selectionCircle;
+    std::vector<QCPItemLine *> m_selectionLine;
+    QCPLayer *cursorLayer;
     Ui::GraphWindow *graph_window;
     QSpacerItem *spacer;
     DataStruct* data_set;
     VisualData* visual_data_set;
-    QCustomPlot *customPlot;   
+    QPlot *customPlot;  
+    QCPGraph *curGraph; 
 };
 
 #endif

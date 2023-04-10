@@ -1,7 +1,9 @@
 #ifndef QPLOT_HPP
 #define QPLOT_HPP
 
-class QPlot
+#include "qcustomplot.h"
+
+class QPlot : public QCustomPlot
 {
 private:
     /* data */
