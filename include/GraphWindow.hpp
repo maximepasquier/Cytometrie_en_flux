@@ -19,6 +19,11 @@ struct Point
     int y;
 };
 
+struct Coords
+{
+    int x, y;
+};
+
 class GraphWindow : public QMainWindow
 {
     Q_OBJECT

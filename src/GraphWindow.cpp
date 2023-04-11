@@ -493,8 +493,7 @@ bool GraphWindow::InsidePolygon(Point polygon[], int N, Point p)
 
 void GraphWindow::gating_ellipse()
 {
-    /*
-    bool *gated_data_array = dataSet->get_gated_data_array();
+    // bool *gated_data_array = dataSet->get_gated_data_array();
     QCPItemPosition *x1y1, *x2y2;
     x1y1 = m_selectionCircle->topLeft;
     x2y2 = m_selectionCircle->bottomRight;
@@ -510,15 +509,30 @@ void GraphWindow::gating_ellipse()
     rayon_horizontal = int(int(abs(x1 - x2)) / 2);
     rayon_vertical = int(int(abs(y1 - y2)) / 2);
     // qDebug() << x1 << " " << y1;
+    //* Get the 2 columns to plot
+    VectorXd first_column = visual_data_set->get_matrix()->col(graph_window->comboBoxMarqueur1->itemData(graph_window->comboBoxMarqueur1->currentIndex()).toInt());
+    VectorXd second_column = visual_data_set->get_matrix()->col(graph_window->comboBoxMarqueur2->itemData(graph_window->comboBoxMarqueur2->currentIndex()).toInt());
+
+    std::vector<int> *indicesToKeep = new std::vector<int>;
+    (*indicesToKeep).reserve(1000000);
+
     for (size_t i = 0; i < first_column.size(); i++)
     {
         if (pow((first_column[i] - center.x), 2) / pow(rayon_horizontal, 2) + pow((second_column[i] - center.y), 2) / pow(rayon_vertical, 2) < 1)
         {
-            gated_data_array[i] = true;
+            //+ Remove line from visal_data_set matrix
+        }
+        else
+        {
+            (*indicesToKeep).push_back(i);
         }
     }
+    qDebug() << (*indicesToKeep).size();
+    // visual_data_set->set_matrix();
+    visual_data_set->truncate_matrix(indicesToKeep);
+    // VectorXd indicesToKeepVector = VectorXd::Map(&indicesToKeep, 12, 13);
+
     replot_graph();
-    */
 }
 
 void GraphWindow::on_DrawPolygon_clicked()

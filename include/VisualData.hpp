@@ -17,6 +17,8 @@ public:
     int get_marqueurs_number();
     void copy_data(DataStruct* data_set);
     MatrixXd* get_matrix();
+    void set_matrix(MatrixXd matrix);
+    void truncate_matrix(std::vector<int> *indicesToKeep);
 };
 
 #endif
