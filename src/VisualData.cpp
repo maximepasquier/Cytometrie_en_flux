@@ -43,5 +43,13 @@ void VisualData::set_matrix(MatrixXd matrix)
 
 void VisualData::truncate_matrix(std::vector<int> *indicesToKeep)
 {
-    *visual_data_matrix = (*visual_data_matrix)(*indicesToKeep, Eigen::all);
+    std::cout << (*visual_data_matrix).rows() << " " << (*visual_data_matrix).cols() << std::endl;
+    MatrixXd *v_matrix = new MatrixXd((*visual_data_matrix).rows(), (*visual_data_matrix).cols());
+    // MatrixXd* data_matrix = new MatrixXd(number_of_lines, number_of_columns);
+    //  *visual_data_matrix = (*visual_data_matrix)(*indicesToKeep, Eigen::all);
+    for (int line = 0; line < indicesToKeep->size(); line++)
+    {
+        (*v_matrix).row(line) << (*visual_data_matrix).row(indicesToKeep->at(line));
+    }
+    visual_data_matrix = v_matrix;
 }

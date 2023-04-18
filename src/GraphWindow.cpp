@@ -527,7 +527,8 @@ void GraphWindow::gating_ellipse()
             (*indicesToKeep).push_back(i);
         }
     }
-    qDebug() << (*indicesToKeep).size();
+    int s = first_column.size() - (*indicesToKeep).size();
+    qDebug() << s;
     // visual_data_set->set_matrix();
     visual_data_set->truncate_matrix(indicesToKeep);
     // VectorXd indicesToKeepVector = VectorXd::Map(&indicesToKeep, 12, 13);
