@@ -102,7 +102,7 @@ void GraphWindow::refresh_plot(int marqueur_number_1, int marqueur_number_2)
     */
 
     //* Set new data and replot
-    customPlot->graph(0)->setData(first_column_QVector, second_column_QVector);
+    customPlot->graph(0)->setData(first_column_QVector, second_column_QVector, visual_data_set->get_gated_data_array());
     customPlot->replot();
 }
 
@@ -212,7 +212,7 @@ void GraphWindow::create_plot()
 
     //* Create graph and assign data to it:
     customPlot->addGraph();
-    customPlot->graph(0)->setData(first_column_QVector, second_column_QVector);
+    customPlot->graph(0)->setData(first_column_QVector, second_column_QVector, visual_data_set->get_gated_data_array());
     customPlot->setInteraction(QCP::iRangeDrag, true);
     customPlot->setInteraction(QCP::iRangeZoom, true);
 
@@ -493,7 +493,7 @@ bool GraphWindow::InsidePolygon(Point polygon[], int N, Point p)
 
 void GraphWindow::gating_ellipse()
 {
-    // bool *gated_data_array = dataSet->get_gated_data_array();
+    bool *gated_data_array = visual_data_set->get_gated_data_array();
     QCPItemPosition *x1y1, *x2y2;
     x1y1 = m_selectionCircle->topLeft;
     x2y2 = m_selectionCircle->bottomRight;
@@ -513,25 +513,27 @@ void GraphWindow::gating_ellipse()
     VectorXd first_column = visual_data_set->get_matrix()->col(graph_window->comboBoxMarqueur1->itemData(graph_window->comboBoxMarqueur1->currentIndex()).toInt());
     VectorXd second_column = visual_data_set->get_matrix()->col(graph_window->comboBoxMarqueur2->itemData(graph_window->comboBoxMarqueur2->currentIndex()).toInt());
 
-    std::vector<int> *indicesToKeep = new std::vector<int>;
-    (*indicesToKeep).reserve(1000000);
+    // std::vector<int> *indicesToKeep = new std::vector<int>;
+    //(*indicesToKeep).reserve(1000000);
 
-    for (size_t i = 0; i < first_column.size(); i++)
+    for (int i = 0; i < first_column.size(); i++)
     {
         if (pow((first_column[i] - center.x), 2) / pow(rayon_horizontal, 2) + pow((second_column[i] - center.y), 2) / pow(rayon_vertical, 2) < 1)
         {
-            //+ Remove line from visal_data_set matrix
+            gated_data_array[i] = true;
         }
         else
         {
-            (*indicesToKeep).push_back(i);
+            //(*indicesToKeep).push_back(i);
         }
     }
+    /*
     int s = first_column.size() - (*indicesToKeep).size();
     qDebug() << s;
     // visual_data_set->set_matrix();
     visual_data_set->truncate_matrix(indicesToKeep);
     // VectorXd indicesToKeepVector = VectorXd::Map(&indicesToKeep, 12, 13);
+    */
 
     replot_graph();
 }

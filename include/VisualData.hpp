@@ -10,6 +10,7 @@ private:
     std::string* visual_marqueurs;
     MatrixXd* visual_data_matrix;
     int marqueurs_number;
+    bool *gated_data_array;
 public:
     VisualData(DataStruct* data_set);
     ~VisualData();
@@ -19,6 +20,7 @@ public:
     MatrixXd* get_matrix();
     void set_matrix(MatrixXd matrix);
     void truncate_matrix(std::vector<int> *indicesToKeep);
+    bool* get_gated_data_array();
 };
 
 #endif
