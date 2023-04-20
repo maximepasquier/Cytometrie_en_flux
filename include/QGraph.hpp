@@ -1,17 +1,13 @@
-#ifndef QPLOT_HPP
-#define QPLOT_HPP
+#ifndef QGraph_CPP
+#define QGraph_CPP
 
 #include "qcustomplot.h"
-#include "QGraph.hpp"
 
-class QPlot : public QCustomPlot
+class QGraph : public QCPGraph
 {
 private:
     /* data */
 public:
-    QPlot(/* args */);
-    ~QPlot();
-    QGraph *graph(int index) const;
     void setData(const QVector<double> &keys, const QVector<double> &values, bool *gated_data_array, bool alreadySorted);
 };
 

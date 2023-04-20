@@ -8,7 +8,15 @@ QPlot::~QPlot()
 {
 }
 
-void QPlot::setData(const QVector<double> &keys, const QVector<double> &values, bool *gated_data_array, bool alreadySorted)
+QGraph *QPlot::graph(int index) const
 {
-    qDebug() << "lkjkljkljlkj";
+    if (index >= 0 && index < mGraphs.size())
+    {
+        return mGraphs.at(index);
+    }
+    else
+    {
+        qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
+        return nullptr;
+    }
 }

@@ -12,6 +12,7 @@
 #include "qcustomplot.h"
 #include "VisualData.hpp"
 #include "QPlot.hpp"
+#include "QGraph.hpp"
 
 struct Point
 {
